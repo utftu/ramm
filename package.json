@@ -1,0 +1,18 @@
+{
+  "name": "ramm",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "bun build ./src/ramm.ts --target bun --outdir ./dist && cp ./src/bun.sh ./dist/bun.sh && bun run types",
+    "types": "tsc --project tsconfig.types.json"
+  },
+  "main": "dist/",
+  "types": "dist/types/ramm.d.ts",
+  "files": [
+    "dist/*"
+  ],
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.8.2"
+  }
+}
