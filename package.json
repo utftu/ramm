@@ -1,12 +1,12 @@
 {
   "name": "ramm",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
     "build": "bun build ./src/ramm.ts --target bun --outdir ./dist && cp ./src/bun.sh ./dist/bun.sh && bun run types",
     "types": "tsc --project tsconfig.types.json"
   },
-  "main": "dist/",
+  "main": "dist/ramm.js",
   "types": "dist/types/ramm.d.ts",
   "files": [
     "dist/*"
