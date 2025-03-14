@@ -1,4 +1,4 @@
-import { $, spawn } from "bun";
+import { $, spawn, file, write } from "bun";
 
 const debugInternal = (func: string, command: string) => {
   console.info(`>>>${func}<<< ${command}`);
@@ -14,7 +14,7 @@ export const debug = (text: string) => {
 
 const execCommand = async (command: string) => {
   debugCommand(command);
-  const result = await spawn(["bash", "-c", command], {
+  const result = spawn(["bash", "-c", command], {
     stdin: "inherit",
     stdout: "inherit",
     stderr: "inherit",
@@ -45,20 +45,43 @@ export const exec = async (context: Context, command: string) => {
 };
 
 export const installSystemPackage = async (packageName: string) => {
-  const osName =
-    await $`cat /etc/os-release | grep ^ID= | cut -d'=' -f2`.text();
+  const osName = (
+    await $`cat /etc/os-release | grep ^ID= | cut -d'=' -f2`.text()
+  ).trim();
 
+  console.log("-----", "osName", osName.replace(/\n/, "\\n"));
   if (osName === "ubuntu") {
-    execCommand(`apt-get install -y ${packageName}`);
+    console.log("-----", "if");
+    await execCommand(`apt-get install -y ${packageName}`);
+  }
+};
+
+const setupRegistry = async () => {
+  const confFilePath = "/etc/containers/registries.conf";
+  const configFile = file(confFilePath);
+
+  if (!(await configFile.exists())) {
+    await $`mkdir -p /etc/containers`;
+    await write(confFilePath, "");
+  }
+
+  if (
+    (
+      await $`cat /etc/containers/registries.conf | grep ^unqualified-search-registries`
+        .nothrow()
+        .quiet()
+    ).exitCode !== 0
+  ) {
+    await $`echo 'unqualified-search-registries = ["docker.io", "quay.io"]' >> /etc/containers/registries.conf`;
   }
 };
 
 export const installPodman = async () => {
-  if ((await $`command -v podman`).exitCode === 0) {
-    return;
+  if ((await $`command -v podman`.nothrow().quiet()).exitCode !== 0) {
+    await installSystemPackage("podman");
   }
 
-  await installSystemPackage("podman");
+  await setupRegistry();
 };
 
 export const runPodmanContainer = async (command: string, name: string) => {
@@ -86,8 +109,8 @@ export const runPodmanContainer = async (command: string, name: string) => {
 };
 
 export const installBun = async (context: Context) => {
-  const bunPath = import.meta.resolve("./bun.sh");
+  const bunPath = new URL(import.meta.resolve("./bun.sh")).pathname;
 
-  await copyFiles(context, bunPath, "bun.sh");
+  await copyFiles(context, bunPath, "./bun.sh");
   await exec(context, "./bun.sh");
 };
