@@ -11,6 +11,8 @@ export const execCommand = async (command: string) => {
   });
 
   await result.exited;
+
+  return result;
 };
 
 export const copyFiles = async (context: Context, from: string, to: string) => {

@@ -1,6 +1,6 @@
 import { $, file, write } from "bun";
-import { execCommand } from "./base.ts";
-import { installSystemPackage } from "./packages.ts";
+import { execCommand } from "../base.ts";
+import { installSystemPackage } from "../packages.ts";
 
 export const installPodman = async () => {
   if ((await $`command -v podman`.nothrow().quiet()).exitCode !== 0) {
@@ -10,7 +10,17 @@ export const installPodman = async () => {
   await setupRegistry();
 };
 
-export const runPodmanContainer = async (command: string, name: string) => {
+export const getCreateCommand = async (name: string) => {
+  const podmanCreateCommand =
+    await $`podman inspect --format '{{.Config.CreateCommand}}' ${name}`
+      .nothrow()
+      .quiet();
+
+  // delete \n => delete []
+  return podmanCreateCommand.text().slice(0, -1).slice(1, -1) || "";
+};
+
+export const runPodmanContainer = async (name: string, command: string) => {
   const podmanCreateCommand =
     await $`podman inspect --format '{{.Config.CreateCommand}}' ${name}`
       .nothrow()
@@ -24,7 +34,7 @@ export const runPodmanContainer = async (command: string, name: string) => {
   // delete \n
   const podmanCreateCommandText = podmanCreateCommand.text().slice(0, -1);
 
-  if (podmanCreateCommandText !== `[${command}]`) {
+  if ((await getCreateCommand(name)) === command) {
     await $`podman rm -f ${name}`;
 
     execCommand(command);
