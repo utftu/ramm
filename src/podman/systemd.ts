@@ -1,5 +1,6 @@
 import { $ } from "bun";
 import { getCreateCommand, runPodmanContainer } from "./podman.ts";
+import { execCommand } from "../base.ts";
 
 const getPossibleSudo = (user: boolean) => {
   if (user) {
@@ -18,7 +19,7 @@ const getSystemdStart = (user: boolean) => {
 };
 
 const getServiceName = (name: string) => {
-  return `${name}_podman.service`;
+  return `${name}.service`;
 };
 
 const getPathToService = (serviceName: string, user: boolean) => {
@@ -32,20 +33,21 @@ const getPathToService = (serviceName: string, user: boolean) => {
 const deleteSystemd = async (nameService: string, user: boolean) => {
   const systemdStart = getSystemdStart(user);
 
-  await $`${systemdStart} stop ${nameService}`;
-  await $`${systemdStart} disable ${nameService}`;
-
-  await $`${getPossibleSudo(user)} rm -rf ${getPathToService(
-    nameService,
-    user
-  )}`;
+  await execCommand(`${systemdStart} stop ${nameService}`);
+  await execCommand(`${systemdStart} disable ${nameService}`);
+  await execCommand(
+    `${getPossibleSudo(user)} rm -rf ${getPathToService(nameService, user)}`
+  );
+  await execCommand(`${systemdStart} daemon-reload`);
+  await execCommand(`${systemdStart} reset-failed`);
 };
 
 const checkSystemd = async (serviceName: string, user: boolean) => {
-  const command = user ? "systemctl --user" : "sudo systemctl";
-  const result = await $`${command} is-active ${serviceName}`.nothrow().quiet();
+  const { spawnResult } = await execCommand(
+    `${getSystemdStart(user)} is-active ${serviceName}`
+  );
 
-  return result.exitCode === 0;
+  return spawnResult.exitCode === 0;
 };
 
 const createSystemdService = async (
@@ -54,37 +56,45 @@ const createSystemdService = async (
   user: boolean
 ) => {
   const serviceName = getServiceName(name);
-  const pathToSevice = getPathToService(name, user);
+  const pathToSevice = getPathToService(serviceName, user);
 
   // new
+  console.log("-----", "new");
   await runPodmanContainer(name, command);
-  await $`podman generate systemd --name --new ${serviceName} > ${serviceName}`;
+  await execCommand(
+    `podman generate systemd --name --new ${name} > ${serviceName}`
+  );
 
-  await $`move -v ${serviceName} ${pathToSevice}`;
+  await execCommand(`cp -v ${serviceName} ${pathToSevice}`);
 
-  if (user) {
-    await $`systemctl --user daemon-reload`;
-  } else {
-    await $`sudo systemctl daemon-reload`;
-  }
+  await execCommand(`${getSystemdStart(user)} daemon-reload`);
+  await execCommand(`${getSystemdStart(user)} enable ${getServiceName(name)}`);
+  await execCommand(`${getSystemdStart(user)} start ${getServiceName(name)}`);
 };
 
-export const runPodmansContainerService = async (
+export const runPodmanContainerService = async (
   name: string,
   command: string,
   user: boolean
 ) => {
-  const createdCommand = await getCreateCommand(name);
+  // const createdCommand = await getCreateCommand(name);
 
-  if (createdCommand === command) {
-    return;
-  }
+  // if (createdCommand === command) {
+  //   return;
+  // }
 
   const serviceName = getServiceName(name);
 
-  if (await checkSystemd(name, user)) {
-    await deleteSystemd(serviceName, user);
+  if (await checkSystemd(serviceName, user)) {
+    await execCommand(`${getSystemdStart(user)} stop ${serviceName}`);
   }
 
+  // await deleteSystemd(serviceName, user);
+
+  // if (await checkSystemd(name, user)) {
+  //   await deleteSystemd(serviceName, user);
+  // }
+
+  // console.log("-----", "3");
   await createSystemdService(name, command, user);
 };

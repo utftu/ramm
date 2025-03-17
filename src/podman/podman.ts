@@ -21,23 +21,10 @@ export const getCreateCommand = async (name: string) => {
 };
 
 export const runPodmanContainer = async (name: string, command: string) => {
-  const podmanCreateCommand =
-    await $`podman inspect --format '{{.Config.CreateCommand}}' ${name}`
-      .nothrow()
-      .quiet();
-
-  if (podmanCreateCommand.exitCode !== 0) {
-    await execCommand(command);
-    return;
-  }
-
-  // delete \n
-  const podmanCreateCommandText = podmanCreateCommand.text().slice(0, -1);
-
-  if ((await getCreateCommand(name)) === command) {
+  if ((await getCreateCommand(name)) !== command) {
     await $`podman rm -f ${name}`;
 
-    execCommand(command);
+    await execCommand(command);
     return;
   }
 
@@ -52,6 +39,11 @@ const setupRegistry = async () => {
     await $`mkdir -p /etc/containers`;
     await write(confFilePath, "");
   }
+
+  const runResult =
+    await $`cat /etc/containers/registries.conf | grep ^unqualified-search-registries`
+      .nothrow()
+      .quiet();
 
   if (
     (

@@ -1,6 +1,4 @@
 import { spawn } from "bun";
-import { debugCommand } from "./debug.ts";
-import type { Context } from "./context.ts";
 
 const tee = async (read: ReadableStream) => {
   const reader = read.getReader();
@@ -20,7 +18,6 @@ const tee = async (read: ReadableStream) => {
 };
 
 export const execCommand = async (command: string) => {
-  debugCommand(command);
   const result = spawn(["bash", "-c", command], {
     stdin: "inherit",
     stdout: "pipe", // Перехватываем stdout
@@ -37,10 +34,5 @@ export const execCommand = async (command: string) => {
   };
 };
 
-export const copyFiles = async (context: Context, from: string, to: string) => {
-  await execCommand(`rsync -avz ${from} ${context.getAddress()}:${to}`);
-};
-
-export const exec = async (context: Context, command: string) => {
-  await execCommand(`ssh ${context.getAddress()} "${command}"`);
-};
+const output = await execCommand("ls /sdsdsd/sdsd");
+console.log("-----", output.spawnResult.exitCode); // Выводим результат
