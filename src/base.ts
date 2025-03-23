@@ -1,6 +1,13 @@
 import { spawn } from "bun";
 import { debugCommand } from "./debug.ts";
-import type { Context } from "./context.ts";
+import { Context } from "./context.ts";
+
+export const defaultContext = new Context({
+  name: "root",
+  address: "0.0.0.0",
+  userspace: false,
+  sudo: false,
+});
 
 const tee = async (read: ReadableStream) => {
   const reader = read.getReader();
@@ -37,10 +44,10 @@ export const execCommand = async (command: string) => {
   };
 };
 
-export const copyFiles = async (context: Context, from: string, to: string) => {
+export const copyFiles = async (from: string, to: string, context: Context) => {
   await execCommand(`rsync -avz ${from} ${context.getAddress()}:${to}`);
 };
 
-export const exec = async (context: Context, command: string) => {
+export const exec = async (command: string, context: Context) => {
   await execCommand(`ssh ${context.getAddress()} "${command}"`);
 };

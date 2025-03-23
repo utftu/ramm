@@ -1,9 +1,24 @@
 export class Context {
   name: string;
   domain: string;
-  constructor(name: string, address: string) {
+  userspace: boolean;
+  sudo: boolean;
+
+  constructor({
+    name,
+    address,
+    userspace = false,
+    sudo = false,
+  }: {
+    name: string;
+    address: string;
+    userspace?: boolean;
+    sudo?: boolean;
+  }) {
     this.name = name;
     this.domain = address;
+    this.sudo = sudo;
+    this.userspace = userspace;
   }
 
   getAddress() {
