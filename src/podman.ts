@@ -33,6 +33,7 @@ export const getCreateCommand = async (name: string) => {
 
 export const runPodmanContainer = async (name: string, command: string) => {
   if ((await getCreateCommand(name)) !== command) {
+    console.log("-----", "rm");
     await $`podman rm -f ${name}`;
 
     await execCommand(command);
