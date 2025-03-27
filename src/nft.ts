@@ -11,35 +11,38 @@ const checkRuleAndRun = async (table: string, rule: string) => {
 export const setupNftable = async (allowedIpToSsh: string) => {
   const listTable = await execCommand("nft list table inet ramm");
 
-  console.log(
-    "-----",
-    "listTable.spawnResult.exitCode",
-    listTable.spawnResult.exitCode
-  );
   if (listTable.spawnResult.exitCode === 0) {
     return;
   }
 
   await execCommand("nft add table inet ramm");
+  await execCommand("nft add chain inet ramm prerouting_local");
   await execCommand(
-    "nft add chain inet ramm prerouting '{ type filter hook prerouting priority 0 ; }'"
+    "nft add chain inet ramm prerouting '{ type filter hook prerouting priority -150 ; }'"
   );
-
-  await execCommand("nft add rule inet ramm prerouting iif lo accept");
+  await execCommand("nft add rule inet ramm prerouting_local iif lo accept");
   await execCommand(
-    "nft add rule inet ramm prerouting ct state established,related accept"
-  );
-  await execCommand(
-    `nft add rule inet ramm prerouting ip saddr ${allowedIpToSsh} tcp dport 22 accept`
+    "nft add rule inet ramm prerouting_local ct state established,related accept"
   );
   await execCommand(
-    "nft add rule inet ramm prerouting tcp dport 22 ct state new limit rate over 3/minute drop"
+    `nft add rule inet ramm prerouting_local ip saddr ${allowedIpToSsh} tcp dport 22 accept`
   );
-  await execCommand("nft add rule inet ramm prerouting tcp dport 22 accept");
-  await execCommand("nft add rule inet ramm prerouting tcp dport 80 accept");
-  await execCommand("nft add rule inet ramm prerouting tcp dport 443 accept");
-
-  await execCommand("nft add rule inet ramm prerouting drop");
+  await execCommand(
+    "nft add rule inet ramm prerouting_local tcp dport 22 ct state new limit rate over 3/minute drop"
+  );
+  await execCommand(
+    "nft add rule inet ramm prerouting_local tcp dport 22 accept"
+  );
+  await execCommand(
+    "nft add rule inet ramm prerouting_local tcp dport 80 accept"
+  );
+  await execCommand(
+    "nft add rule inet ramm prerouting_local tcp dport 443 accept"
+  );
+  await execCommand("nft add rule inet ramm prerouting_local drop");
+  await execCommand(
+    "nft add rule inet ramm prerouting fib daddr type local jump prerouting_local "
+  );
 };
 
 // export const setupNftable = async (allowedIpToSsh: string) => {
