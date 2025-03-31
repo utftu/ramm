@@ -75,10 +75,10 @@ export const addNftPodmanRule = async () => {
   );
 
   await execCommand(
-    "nft add chain inet ramm forward '{ type filter hook input priority 0 ; }'"
+    "nft add chain inet ramm forward '{ type filter hook forward priority 0 ; }'"
   );
 
   await execCommand(
-    `nft add rule inet ramm forward iifname @podman_interfaces jump ${localNftChainName}`
+    `nft add rule inet ramm forward iifname != @podman_interfaces jump ${localNftChainName}`
   );
 };

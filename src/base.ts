@@ -74,10 +74,14 @@ export const execCommandSilent = async (command: string) => {
   };
 };
 
-export const copyFiles = async (from: string, to: string, context: Context) => {
+export const copyFilesBySsh = async (
+  from: string,
+  to: string,
+  context: Context
+) => {
   await execCommand(`rsync -avz ${from} ${context.getAddress()}:${to}`);
 };
 
-export const exec = async (command: string, context: Context) => {
-  await execCommand(`ssh ${context.getAddress()} "${command}"`);
+export const execBySsh = async (command: string, context: Context) => {
+  return await execCommand(`ssh ${context.getAddress()} "${command}"`);
 };
