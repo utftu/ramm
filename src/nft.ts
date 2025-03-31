@@ -1,74 +1,61 @@
-import { execCommand } from "./base.ts";
+import { execCommand, execCommandSilent } from "./base.ts";
 
-const checkRuleAndRun = async (table: string, rule: string) => {
-  if (table.includes(rule)) {
-    return;
-  }
+export const localNftChainName = "local_chain";
 
-  await execCommand(`"nft add rule inet filter input ${rule}`);
-};
-
-export const setupNftable = async (allowedIpToSsh: string) => {
-  const listTable = await execCommand("nft list table inet ramm");
+export const setupNftable = async (allowedIpSsh: string) => {
+  const listTable = await execCommandSilent("nft list table inet ramm");
 
   if (listTable.spawnResult.exitCode === 0) {
-    return;
+    await execCommand("nft delete table inet ramm");
   }
 
   await execCommand("nft add table inet ramm");
-  await execCommand("nft add chain inet ramm prerouting_local");
   await execCommand(
-    "nft add chain inet ramm prerouting '{ type filter hook prerouting priority -150 ; }'"
-  );
-  await execCommand("nft add rule inet ramm prerouting_local iif lo accept");
-  await execCommand(
-    "nft add rule inet ramm prerouting_local ct state established,related accept"
+    "nft add chain inet ramm input '{ type filter hook input priority 0 ; }'"
   );
   await execCommand(
-    `nft add rule inet ramm prerouting_local ip saddr ${allowedIpToSsh} tcp dport 22 accept`
+    `nft add set inet ramm allowed_ssh_ipv4 '{ type ipv4_addr; flags dynamic; elements = { ${allowedIpSsh} } }'`
+  );
+  await execCommand(`nft add chain inet ramm ${localNftChainName}`);
+  await execCommand(
+    `nft add rule inet ramm ${localNftChainName} iif lo accept`
   );
   await execCommand(
-    "nft add rule inet ramm prerouting_local tcp dport 22 ct state new limit rate over 3/minute drop"
+    `nft add rule inet ramm ${localNftChainName} ct state established,related accept`
   );
   await execCommand(
-    "nft add rule inet ramm prerouting_local tcp dport 22 accept"
+    `nft add rule inet ramm ${localNftChainName} ip saddr @allowed_ssh_ipv4 tcp dport 22 accept`
   );
   await execCommand(
-    "nft add rule inet ramm prerouting_local tcp dport 80 accept"
+    `nft add rule inet ramm ${localNftChainName} tcp dport 22 ct state new limit rate over 3/minute drop`
   );
   await execCommand(
-    "nft add rule inet ramm prerouting_local tcp dport 443 accept"
+    `nft add rule inet ramm ${localNftChainName} tcp dport 22 accept`
   );
-  await execCommand("nft add rule inet ramm prerouting_local drop");
   await execCommand(
-    "nft add rule inet ramm prerouting fib daddr type local jump prerouting_local "
+    `nft add rule inet ramm ${localNftChainName} tcp dport 80 accept`
   );
+  await execCommand(
+    `nft add rule inet ramm ${localNftChainName} tcp dport 443 accept`
+  );
+  await execCommand(`nft add rule inet ramm ${localNftChainName} drop`);
+
+  await execCommand(
+    "nft add rule inet ramm input fib daddr type local jump local_chain "
+  );
+
+  // const podmanNetworksResult = await execCommand(
+  //   "podman network inspect $(podman network ls -q) -f '{{.NetworkInterface}}'"
+  // );
+  // const podmanNetworks = podmanNetworksResult.output.trim().split("\n");
+
+  // await execCommand(
+  //   `nft add set inet ramm podman_interfaces '{ type ifname; flags dynamic; elements = { ${podmanNetworks.join(
+  //     ", "
+  //   )} }; }'`
+  // );
+
+  // await execCommand(
+  //   "nft add rule inet ramm prerouting fib daddr type local iifname != @podman_interfaces jump prerouting_local "
+  // );
 };
-
-// export const setupNftable = async (allowedIpToSsh: string) => {
-//   await execCommand("nft add table inet filter");
-//   await execCommand(
-//     "nft add chain inet filter input '{ type filter hook input priority 0 ; }'"
-//   );
-
-//   const listCommdn = await execCommand("nft list chain inet filter input");
-
-//   await checkRuleAndRun(listCommdn.output, 'iif "lo" accept');
-//   await checkRuleAndRun(listCommdn.output, "tcp dport 22 accept");
-//   await checkRuleAndRun(
-//     listCommdn.output,
-//     "ct state established,related accept"
-//   );
-//   await checkRuleAndRun(
-//     listCommdn.output,
-//     `ip saddr ${allowedIpToSsh} tcp dport 22 accept`
-//   );
-//   await checkRuleAndRun(
-//     listCommdn.output,
-//     `tcp dport 22 ct state new limit rate over 3/minute drop`
-//   );
-//   await checkRuleAndRun(listCommdn.output, "drop");
-
-//   await execCommand("nft list ruleset > /etc/nftables.conf");
-//   await execCommand("systemctl enable nftables");
-// };

@@ -1,5 +1,5 @@
 import { spawn } from "bun";
-import { debugCommand } from "./debug.ts";
+import { debugCommand, debugSilentCommand } from "./debug.ts";
 import { Context } from "./context.ts";
 
 export const defaultContext = new Context({
@@ -26,6 +26,22 @@ const tee = async (read: ReadableStream) => {
   }
 };
 
+const readStreamToStr = async (read: ReadableStream) => {
+  const reader = read.getReader();
+  let output = "";
+
+  while (true) {
+    const { value, done: doneReading } = await reader.read();
+    if (doneReading) {
+      return output;
+    }
+
+    const decoder = new TextDecoder("utf-8");
+
+    output += decoder.decode(value);
+  }
+};
+
 export const execCommand = async (command: string) => {
   debugCommand(command);
   const result = spawn(["bash", "-c", command], {
@@ -35,6 +51,20 @@ export const execCommand = async (command: string) => {
   });
 
   const output = await tee(result.stdout);
+
+  await result.exited;
+
+  return {
+    output,
+    spawnResult: result,
+  };
+};
+
+export const execCommandSilent = async (command: string) => {
+  debugSilentCommand(command);
+  const result = spawn(["bash", "-c", command]);
+
+  const output = await readStreamToStr(result.stdout);
 
   await result.exited;
 

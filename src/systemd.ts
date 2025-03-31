@@ -36,7 +36,7 @@ export const checkSystemdService = async (
   serviceName: string
 ) => {
   const { spawnResult } = await execCommand(
-    formatUserspace(context, `systemct is-action ${serviceName}`)
+    formatUserspace(context, `systemctl is-active ${serviceName}`)
   );
 
   return spawnResult.exitCode === 0;

@@ -8,6 +8,7 @@ import {
   getSysyemdServiceName,
   stopSystemdService,
 } from "./systemd.ts";
+import { localNftChainName } from "./nft.ts";
 
 export const installPodman = async () => {
   if ((await $`command -v podman`.nothrow().quiet()).exitCode !== 0) {
@@ -18,7 +19,7 @@ export const installPodman = async () => {
 };
 
 const createNetwork = async () => {
-  await execCommand("podman network create ramm");
+  await execCommand("podman network create --interface-name=podman_ramm ramm");
 };
 
 export const getCreateCommand = async (name: string) => {
@@ -33,7 +34,6 @@ export const getCreateCommand = async (name: string) => {
 
 export const runPodmanContainer = async (name: string, command: string) => {
   if ((await getCreateCommand(name)) !== command) {
-    console.log("-----", "rm");
     await $`podman rm -f ${name}`;
 
     await execCommand(command);
@@ -60,4 +60,25 @@ export const runPodmanContainerService = async (
   );
 
   await createSystemdService(context, serviceName, serviceName);
+};
+
+export const addNftPodmanRule = async () => {
+  const podmanNetworksResult = await execCommand(
+    "podman network inspect $(podman network ls -q) -f '{{.NetworkInterface}}'"
+  );
+  const podmanNetworks = podmanNetworksResult.output.trim().split("\n");
+
+  await execCommand(
+    `nft add set inet ramm podman_interfaces '{ type ifname; flags dynamic; elements = { ${podmanNetworks.join(
+      ", "
+    )} }; }'`
+  );
+
+  await execCommand(
+    "nft add chain inet ramm forward '{ type filter hook input priority 0 ; }'"
+  );
+
+  await execCommand(
+    `nft add rule inet ramm forward iifname @podman_interfaces jump ${localNftChainName}`
+  );
 };
