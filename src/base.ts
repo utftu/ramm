@@ -83,5 +83,8 @@ export const copyFilesBySsh = async (
 };
 
 export const execBySsh = async (command: string, context: Context) => {
-  return await execCommand(`ssh ${context.getAddress()} "${command}"`);
+  const sshKeyPart = context.sshKey ? ` -i ${context.sshKey}` : "";
+  return await execCommand(
+    `ssh${sshKeyPart} ${context.getAddress()} '${command}'`
+  );
 };
