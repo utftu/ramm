@@ -1,25 +1,37 @@
 import { execBySsh, execCommand } from "./base.ts";
-import path, { join } from "path";
-import type { Context } from "../dist/ramm.js";
+import type { Context } from "./context.ts";
 import { debug } from "console";
 
-const setupSshKeyUse = async (ip: string, pathToKey: string) => {
-  const configFile = Bun.file("~/.ssh/config");
-  if (!(await configFile.exists())) {
-    await execCommand(`touch ~/.ssh/config`);
-  }
+// const setupSshKeyUse = async (ip: string, pathToKey: string) => {
+//   const configFile = Bun.file("~/.ssh/config");
+//   if (!(await configFile.exists())) {
+//     await execCommand(`touch ~/.ssh/config`);
+//   }
 
-  const configContent = await configFile.text();
+//   const configContent = await configFile.text();
 
-  if (configContent.includes(ip)) {
-    return;
-  }
-  const hostConfig = `
-Host ${ip}
-  IdentityFile ${pathToKey}
-`;
+//   if (configContent.includes(ip)) {
+//     return;
+//   }
+//   const hostConfig = `
+// Host ${ip}
+//   IdentityFile ${pathToKey}
+// `;
 
-  await execCommand(`\necho "${hostConfig}" >> ~/.ssh/config`);
+//   await execCommand(`\necho "${hostConfig}" >> ~/.ssh/config`);
+// };
+
+export const setupHostConfig = (address: string, pathToKey: string) => {
+  const text = `Host ${address}
+IdentityFile ${pathToKey}\n`;
+};
+
+export const getServerFingerprintBySsh = async (context: Context) => {
+  const { output } = await execBySsh(
+    'ssh-keyscan -t ed25519 localhost | grep -v "^#"',
+    context
+  );
+  return output.replace("localhost", context.domain);
 };
 
 async function createSshKey(pathToKey: string, comment?: string) {
