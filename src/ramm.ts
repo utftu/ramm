@@ -1,4 +1,4 @@
-export { execBySsh, copyFilesBySsh } from "./base.ts";
+export { execBySsh, execCommand, copyFilesBySsh } from "./base.ts";
 export { Context } from "./context.ts";
 export { installBun } from "./init.ts";
 export { installPodman, runPodmanContainer } from "./podman.ts";
