@@ -1,4 +1,4 @@
-import { appendFile, stat } from "node:fs/promises";
+import { appendFile, exists, stat } from "node:fs/promises";
 import { execCommand } from "./base.ts";
 
 const finalizeWithNewline = (str: string) => {
@@ -12,9 +12,9 @@ const finalizeWithNewline = (str: string) => {
 const createDir = async (str: string) => {
   const dirname = str.split("/").slice(0, -1).join("/");
 
-  const stats = await stat(dirname);
+  const exist = await exists(dirname);
 
-  if (stats.isDirectory()) {
+  if (exist) {
     return;
   }
 
@@ -38,11 +38,11 @@ const checkStrInFile = async (filePath: string, str: string) => {
 };
 
 export const writeIfNew = async (filePath: string, str: string) => {
+  await createDir(filePath);
+
   if (await checkStrInFile(filePath, str)) {
     return;
   }
-
-  await createDir(filePath);
 
   if (!(await Bun.file(filePath).exists())) {
     await execCommand(`touch ${filePath}`);
