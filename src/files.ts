@@ -1,5 +1,6 @@
 import { appendFile, exists, stat } from "node:fs/promises";
 import { execCommand } from "./base.ts";
+import { normalizePath } from "./path.ts";
 
 const finalizeWithNewline = (str: string) => {
   if (str.at(-1) !== "\n") {
@@ -37,7 +38,8 @@ const checkStrInFile = async (filePath: string, str: string) => {
   return false;
 };
 
-export const writeIfNew = async (filePath: string, str: string) => {
+export const writeIfNew = async (rawFilePath: string, str: string) => {
+  const filePath = normalizePath(rawFilePath);
   await createDir(filePath);
 
   if (await checkStrInFile(filePath, str)) {

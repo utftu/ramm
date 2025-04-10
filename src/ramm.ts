@@ -13,3 +13,4 @@ export {
   getServerFingerprintBySsh,
   addKeyToHostConfig,
 } from "./ssh.ts";
+export { normalizePath } from "./path.ts";
