@@ -1,6 +1,7 @@
 import { execBySsh, execCommand } from "./base.ts";
 import type { Context } from "./context.ts";
 import { debug } from "console";
+import { writeIfNew } from "./files.ts";
 
 // const setupSshKeyUse = async (ip: string, pathToKey: string) => {
 //   const configFile = Bun.file("~/.ssh/config");
@@ -21,9 +22,15 @@ import { debug } from "console";
 //   await execCommand(`\necho "${hostConfig}" >> ~/.ssh/config`);
 // };
 
-export const setupHostConfig = (address: string, pathToKey: string) => {
+export const addKeyToHostConfig = async (
+  address: string,
+  pathToKey: string
+) => {
   const text = `Host ${address}
-IdentityFile ${pathToKey}\n`;
+  IdentityFile ${pathToKey}
+`;
+
+  await writeIfNew(pathToKey, text);
 };
 
 export const getServerFingerprintBySsh = async (context: Context) => {
