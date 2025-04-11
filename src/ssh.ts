@@ -3,26 +3,8 @@ import type { Context } from "./context.ts";
 import { debug } from "console";
 import { writeIfNew } from "./files.ts";
 
-// const setupSshKeyUse = async (ip: string, pathToKey: string) => {
-//   const configFile = Bun.file("~/.ssh/config");
-//   if (!(await configFile.exists())) {
-//     await execCommand(`touch ~/.ssh/config`);
-//   }
-
-//   const configContent = await configFile.text();
-
-//   if (configContent.includes(ip)) {
-//     return;
-//   }
-//   const hostConfig = `
-// Host ${ip}
-//   IdentityFile ${pathToKey}
-// `;
-
-//   await execCommand(`\necho "${hostConfig}" >> ~/.ssh/config`);
-// };
-
 export const addKeyToHostConfig = async (
+  pathToHost: string,
   address: string,
   pathToKey: string
 ) => {
@@ -30,7 +12,7 @@ export const addKeyToHostConfig = async (
   IdentityFile ${pathToKey}
 `;
 
-  await writeIfNew(pathToKey, text);
+  await writeIfNew(pathToHost, text);
 };
 
 export const getServerFingerprintBySsh = async (context: Context) => {
