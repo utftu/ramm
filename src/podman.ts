@@ -8,7 +8,6 @@ import {
   getSysyemdServiceName,
   stopSystemdService,
 } from "./systemd.ts";
-import { localNftChainName } from "./nft.ts";
 
 export const installPodman = async () => {
   if ((await $`command -v podman`.nothrow().quiet()).exitCode !== 0) {
@@ -19,6 +18,12 @@ export const installPodman = async () => {
 };
 
 const createNetwork = async () => {
+  const netwroks = await execCommand(
+    "podman network inspect $(podman network ls -q) -f '{{.NetworkInterface}}'"
+  );
+  if (netwroks.output.includes("podman_ramm")) {
+    return;
+  }
   await execCommand("podman network create --interface-name=podman_ramm ramm");
 };
 
@@ -75,10 +80,6 @@ export const addNftPodmanRule = async () => {
   );
 
   await execCommand(
-    "nft add chain inet ramm forward '{ type filter hook forward priority 0 ; }'"
-  );
-
-  await execCommand(
-    `nft add rule inet ramm forward iifname != @podman_interfaces jump ${localNftChainName}`
+    "nft insert rule inet ramm prerouting iifname @podman_interfaces accept"
   );
 };
