@@ -1,5 +1,6 @@
 import { appendFile, exists, stat } from "node:fs/promises";
 import { execCommand } from "./base.ts";
+import { write } from "bun";
 import { normalizePath } from "./path.ts";
 
 const finalizeWithNewline = (str: string) => {
@@ -38,17 +39,29 @@ const checkStrInFile = async (filePath: string, str: string) => {
   return false;
 };
 
-export const writeIfNew = async (rawFilePath: string, str: string) => {
+const createFileIfNeed = async (rawFilePath: string) => {
   const filePath = normalizePath(rawFilePath);
   await createDir(filePath);
+
+  if (!(await Bun.file(filePath).exists())) {
+    await execCommand(`touch ${filePath}`);
+  }
+};
+
+export const writeIfNew = async (rawFilePath: string, str: string) => {
+  const filePath = normalizePath(rawFilePath);
+  await createFileIfNeed(filePath);
 
   if (await checkStrInFile(filePath, str)) {
     return;
   }
 
-  if (!(await Bun.file(filePath).exists())) {
-    await execCommand(`touch ${filePath}`);
-  }
-
   await appendFile(filePath, finalizeWithNewline(str));
+};
+
+export const writeFile = async (pathToFile: string, str: string) => {
+  const normalizedPath = normalizePath(pathToFile);
+  await createFileIfNeed(normalizedPath);
+
+  await write(normalizedPath, str);
 };
