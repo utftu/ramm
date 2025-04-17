@@ -1,6 +1,6 @@
 import { appendFile, exists, stat } from "node:fs/promises";
 import { execCommand } from "./base.ts";
-import { write } from "bun";
+import { file, write } from "bun";
 import { normalizePath } from "./path.ts";
 
 const finalizeWithNewline = (str: string) => {
@@ -62,6 +62,19 @@ export const writeIfNew = async (rawFilePath: string, str: string) => {
 export const writeFile = async (pathToFile: string, str: string) => {
   const normalizedPath = normalizePath(pathToFile);
   await createFileIfNeed(normalizedPath);
+
+  await write(normalizedPath, str);
+};
+
+export const writeFileIfNotMatch = async (pathToFile: string, str: string) => {
+  const normalizedPath = normalizePath(pathToFile);
+  await createFileIfNeed(normalizedPath);
+
+  const fileText = await file(normalizedPath).text();
+
+  if (fileText === str) {
+    return;
+  }
 
   await write(normalizedPath, str);
 };
