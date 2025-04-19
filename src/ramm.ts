@@ -7,7 +7,12 @@ export { restartSystemdService } from "./systemd.ts";
 export { installSystemPackage } from "./packages.ts";
 export { debugBlock } from "./debug.ts";
 export { setupNftable } from "./nft.ts";
-export { writeIfNew, writeFile, writeFileIfNotMatch } from "./files.ts";
+export {
+  writeIfNew,
+  writeFile,
+  writeFileIfNotMatch,
+  normalizeFileContent,
+} from "./files.ts";
 export {
   createAndAddSshKey,
   getServerFingerprintBySsh,

@@ -3,7 +3,11 @@ import { execCommand } from "./base.ts";
 import { file, write } from "bun";
 import { normalizePath } from "./path.ts";
 
-const finalizeWithNewline = (str: string) => {
+export const normalizeFileContent = (str: string) => {
+  if (str === "") {
+    return str;
+  }
+
   if (str.at(-1) !== "\n") {
     return str + "\n";
   }
@@ -56,7 +60,7 @@ export const writeIfNew = async (rawFilePath: string, str: string) => {
     return;
   }
 
-  await appendFile(filePath, finalizeWithNewline(str));
+  await appendFile(filePath, normalizeFileContent(str));
 };
 
 export const writeFile = async (pathToFile: string, str: string) => {
