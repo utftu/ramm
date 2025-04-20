@@ -14,7 +14,7 @@ const createNftTable = (allowed_ssh_ipv4: string) => {
       iif "lo" accept 
       ct state established,related accept
       ip saddr @allowed_ssh_ipv4 tcp dport 22 accept
-      tcp dport 22 ct state new limit rate over 3/minute burst 5 packets drop
+      tcp dport 22 ct state new limit rate over 700/minute burst 5 packets drop
       tcp dport 22 accept
       tcp dport 80 accept
       tcp dport 443 accept
