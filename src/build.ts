@@ -1,10 +1,10 @@
-import { build } from "bun";
+import { build, file } from "bun";
 import type { Context } from "./context.ts";
 import { copyFilesBySsh, execBySsh, execCommand } from "./base.ts";
 import { normalizePath } from "./path.ts";
 import { writeFile } from "./files.ts";
 
-export const buildAndRunOverSSh = async ({
+export const buildAndRunOverSsh = async ({
   entrypoint,
   context,
 }: {
@@ -12,7 +12,7 @@ export const buildAndRunOverSSh = async ({
   context: Context;
 }) => {
   const normalizedEntrypoint = normalizePath(entrypoint);
-  const distName = `ramm_dist_${new Date().getTime()}`;
+  const distName = `ramm_dist`;
   const distDir = `/tmp/${distName}`;
   const outputs = await build({
     outdir: distDir,
@@ -28,8 +28,22 @@ export const buildAndRunOverSSh = async ({
   await execCommand(`rm -rf ${distDir}`);
 };
 
-const a = async (data: Record<string, any>) => {
+export const passVarsClient = async (
+  data: Record<string, any>,
+  context: Context
+) => {
   const json = JSON.stringify(data);
 
   await writeFile("/tmp/ramm_json", json);
+
+  await copyFilesBySsh("/tmp/ramm_json", "/tmp/ramm_json", context);
+
+  await execCommand("rm -rf /tmp/ramm_json");
+};
+
+export const passVarsServer = async () => {
+  const jsonData = await file("/tmp/ramm_json").json();
+
+  await execCommand("rm -rf /tmp/ramm_json");
+  return jsonData;
 };

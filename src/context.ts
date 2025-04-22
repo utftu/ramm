@@ -4,6 +4,7 @@ export class Context {
   userspace: boolean;
   sudo: boolean;
   sshKey?: string;
+  params: Record<string, string> = {};
 
   constructor({
     name,

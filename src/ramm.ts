@@ -20,4 +20,4 @@ export {
 } from "./ssh.ts";
 export { normalizePath } from "./path.ts";
 export { createCron } from "./cron.ts";
-export { buildAndRunOverSSh } from "./build.ts";
+export { buildAndRunOverSsh, passVarsClient, passVarsServer } from "./build.ts";
