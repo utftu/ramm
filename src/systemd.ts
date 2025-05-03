@@ -4,8 +4,8 @@ import { Context } from "./context.ts";
 // MUST START WITH systemctl
 const systemctlWordLangth = "systemctl ".length;
 const formatUserspace = (context: Context, command: string) => {
-  const userPart = context.userspace ? "--user" : "";
-  return `systemctl ${userPart} ${command.slice(systemctlWordLangth)}`;
+  const userPart = context.userspace ? " --user " : "";
+  return "systemctl" + userPart + " " + command.slice(systemctlWordLangth);
 };
 
 export const getSysyemdServiceName = (name: string) => {
