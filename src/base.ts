@@ -26,6 +26,23 @@ const tee = async (read: ReadableStream) => {
   }
 };
 
+export const teeErr = async (read: ReadableStream) => {
+  const reader = read.getReader();
+  let output = "";
+
+  while (true) {
+    const { value, done: doneReading } = await reader.read();
+    if (doneReading) {
+      return output;
+    }
+
+    const decoder = new TextDecoder("utf-8");
+
+    output += decoder.decode(value);
+    process.stderr.write(value);
+  }
+};
+
 const readStreamToStr = async (read: ReadableStream) => {
   const reader = read.getReader();
   let output = "";
@@ -42,19 +59,43 @@ const readStreamToStr = async (read: ReadableStream) => {
   }
 };
 
+// export const execCommand = async (command: string) => {
+//   debugCommand(command);
+//   const result = spawn(["bash", "-c", command], {
+//     stdin: "inherit",
+//     stdout: "pipe", // Перехватываем stdout
+//     stderr: "inherit",
+//   });
+
+//   const output = await tee(result.stdout);
+
+//   await result.exited;
+
+//   return {
+//     output,
+//     spawnResult: result,
+//   };
+// };
+
 export const execCommand = async (command: string) => {
   debugCommand(command);
   const result = spawn(["bash", "-c", command], {
     stdin: "inherit",
     stdout: "pipe", // Перехватываем stdout
-    stderr: "inherit",
+    stderr: "pipe",
   });
 
-  const output = await tee(result.stdout);
+  const [output, outputErr] = await Promise.all([
+    tee(result.stdout),
+    teeErr(result.stderr),
+  ]);
+  // const output = await tee(result.stdout);
+  // const outputErr = await teeErr(result.stderr);
 
   await result.exited;
 
   return {
+    outputErr,
     output,
     spawnResult: result,
   };
