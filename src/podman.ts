@@ -37,6 +37,16 @@ export const getCreateCommand = async (name: string) => {
   return podmanCreateCommand.text().slice(0, -1).slice(1, -1) || "";
 };
 
+export const loginPodman = async (
+  address: string,
+  login: string,
+  password: string
+) => {
+  return await execCommand(
+    `echo "${password}" | podman login --username "${login}" --password-stdin ${address}`
+  );
+};
+
 export const runPodmanContainer = async (name: string, command: string) => {
   if ((await getCreateCommand(name)) !== command) {
     await $`podman rm -f ${name}`;

@@ -59,24 +59,6 @@ const readStreamToStr = async (read: ReadableStream) => {
   }
 };
 
-// export const execCommand = async (command: string) => {
-//   debugCommand(command);
-//   const result = spawn(["bash", "-c", command], {
-//     stdin: "inherit",
-//     stdout: "pipe", // Перехватываем stdout
-//     stderr: "inherit",
-//   });
-
-//   const output = await tee(result.stdout);
-
-//   await result.exited;
-
-//   return {
-//     output,
-//     spawnResult: result,
-//   };
-// };
-
 export const execCommand = async (command: string) => {
   debugCommand(command);
   const result = spawn(["bash", "-c", command], {
@@ -89,8 +71,6 @@ export const execCommand = async (command: string) => {
     tee(result.stdout),
     teeErr(result.stderr),
   ]);
-  // const output = await tee(result.stdout);
-  // const outputErr = await teeErr(result.stderr);
 
   await result.exited;
 
