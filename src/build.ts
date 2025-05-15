@@ -1,6 +1,6 @@
 import { build, file } from "bun";
 import type { Context } from "./context.ts";
-import { copyFilesBySsh, execBySsh, execCommand } from "./base.ts";
+import { copyFilesBySsh, execBySsh, execCommand } from "./base/base.ts";
 import { normalizePath } from "./path.ts";
 import { writeFile } from "./files.ts";
 

@@ -1,4 +1,4 @@
-import { execCommand, execCommandSilent } from "./base.ts";
+import { execCommandMayError, execCommandSilent } from "./base/base.ts";
 
 export const localNftChainName = "local_chain";
 
@@ -34,11 +34,11 @@ export const setupNftable = async (allowedIpSsh: string) => {
   const listTable = await execCommandSilent("nft list table inet ramm");
 
   if (listTable.spawnResult.exitCode === 0) {
-    await execCommand("nft delete table inet ramm");
+    await execCommandMayError("nft delete table inet ramm");
   }
   const nftTable = createNftTable(allowedIpSsh);
-  await execCommand(`nft -f - <<EOF\n${nftTable}\nEOF`);
+  await execCommandMayError(`nft -f - <<EOF\n${nftTable}\nEOF`);
 
-  await execCommand("nft list ruleset > /etc/nftables.conf");
-  await execCommand("systemctl enable nftables");
+  await execCommandMayError("nft list ruleset > /etc/nftables.conf");
+  await execCommandMayError("systemctl enable nftables");
 };

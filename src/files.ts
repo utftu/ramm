@@ -1,5 +1,5 @@
-import { appendFile, exists, stat } from "node:fs/promises";
-import { execCommand } from "./base.ts";
+import { appendFile, exists } from "node:fs/promises";
+import { execCommand } from "./base/base.ts";
 import { file, write } from "bun";
 import { normalizePath } from "./path.ts";
 

@@ -1,5 +1,5 @@
 import { $ } from "bun";
-import { execCommand } from "./base.ts";
+import { execCommandMayError } from "./base/base.ts";
 
 export const installSystemPackage = async (packageName: string) => {
   const osName = (
@@ -7,6 +7,6 @@ export const installSystemPackage = async (packageName: string) => {
   ).trim();
 
   if (osName === "ubuntu") {
-    await execCommand(`apt-get install -y ${packageName}`);
+    await execCommandMayError(`apt-get install -y ${packageName}`);
   }
 };

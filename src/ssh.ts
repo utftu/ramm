@@ -1,4 +1,4 @@
-import { execBySsh, execCommand } from "./base.ts";
+import { execBySsh, execCommandMayError } from "./base/base.ts";
 import type { Context } from "./context.ts";
 import { debug } from "console";
 import { writeIfNew } from "./files.ts";
@@ -35,13 +35,13 @@ async function createSshKey(pathToKey: string, comment?: string) {
     return await pathToKeyPubFile.text();
   }
 
-  await execCommand(`mkdir -p ${pathToDir}`);
+  await execCommandMayError(`mkdir -p ${pathToDir}`);
 
-  await execCommand(
+  await execCommandMayError(
     `ssh-keygen -t ed25519 -f ${pathToKey} -N "" -C "${comment || name}"`
   );
 
-  await execCommand(`chmod 600 ${pathToKey}`);
+  await execCommandMayError(`chmod 600 ${pathToKey}`);
 
   const pubKey = await Bun.file(pathToKeyPub).text();
 

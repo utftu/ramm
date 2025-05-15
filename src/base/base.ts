@@ -1,6 +1,7 @@
 import { spawn } from "bun";
-import { debugCommand, debugSilentCommand } from "./debug.ts";
-import { Context } from "./context.ts";
+import { debugCommand, debugSilentCommand } from "../debug.ts";
+import { Context } from "../context.ts";
+import { readStreamToStr, tee, teeErr } from "./tee.ts";
 
 export const defaultContext = new Context({
   name: "root",
@@ -9,57 +10,7 @@ export const defaultContext = new Context({
   sudo: false,
 });
 
-const tee = async (read: ReadableStream) => {
-  const reader = read.getReader();
-  let output = "";
-
-  while (true) {
-    const { value, done: doneReading } = await reader.read();
-    if (doneReading) {
-      return output;
-    }
-
-    const decoder = new TextDecoder("utf-8");
-
-    output += decoder.decode(value);
-    process.stdout.write(value);
-  }
-};
-
-export const teeErr = async (read: ReadableStream) => {
-  const reader = read.getReader();
-  let output = "";
-
-  while (true) {
-    const { value, done: doneReading } = await reader.read();
-    if (doneReading) {
-      return output;
-    }
-
-    const decoder = new TextDecoder("utf-8");
-
-    output += decoder.decode(value);
-    process.stderr.write(value);
-  }
-};
-
-const readStreamToStr = async (read: ReadableStream) => {
-  const reader = read.getReader();
-  let output = "";
-
-  while (true) {
-    const { value, done: doneReading } = await reader.read();
-    if (doneReading) {
-      return output;
-    }
-
-    const decoder = new TextDecoder("utf-8");
-
-    output += decoder.decode(value);
-  }
-};
-
-export const execCommand = async (command: string) => {
+export const execCommandMayError = async (command: string) => {
   debugCommand(command);
   const result = spawn(["bash", "-c", command], {
     stdin: "inherit",
@@ -79,6 +30,19 @@ export const execCommand = async (command: string) => {
     output,
     spawnResult: result,
   };
+};
+
+export const execCommand = async (command: string) => {
+  const result = await execCommandMayError(command);
+
+  if (result.spawnResult.exitCode !== 0) {
+    console.error(">>>Error<<<");
+    console.error("command:", command);
+
+    throw new Error(command);
+  }
+
+  return result;
 };
 
 export const execCommandSilent = async (command: string) => {

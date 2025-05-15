@@ -19,6 +19,7 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
+    "balg": "^0.0.2",
     "desy": "^0.0.14"
   }
 }

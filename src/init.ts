@@ -1,4 +1,4 @@
-import { copyFilesBySsh, execBySsh } from "./base.ts";
+import { copyFilesBySsh, execBySsh } from "./base/base.ts";
 import type { Context } from "./context.ts";
 
 export const installBun = async (context: Context) => {

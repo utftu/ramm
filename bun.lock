@@ -4,6 +4,7 @@
     "": {
       "name": "rem",
       "dependencies": {
+        "balg": "^0.0.2",
         "desy": "^0.0.14",
       },
       "devDependencies": {
@@ -18,6 +19,8 @@
     "@types/node": ["@types/node@22.13.10", "", { "dependencies": { "undici-types": "~6.20.0" } }, "sha512-I6LPUvlRH+O6VRUqYOcMudhaIdUVWfsjnZavnsraHvpBwaEyMN29ry+0UVJhImYL16xsscu0aske3yA+uPOWfw=="],
 
     "@types/ws": ["@types/ws@8.5.14", "", { "dependencies": { "@types/node": "*" } }, "sha512-bd/YFLW+URhBzMXurx7lWByOu+xzU9+kb3RboOteXYDfW+tr+JZa99OyNmPINEGB/ahzKrEuc8rcv4gnpJmxTw=="],
+
+    "balg": ["balg@0.0.2", "", {}, "sha512-uUjUjRxS0G2r3bOJjH9me1FP6CTlpVAtgQdI6ItGi5Oq8l0qPcgX0okGp1rqLORiJtNhtA6zpbRV8QWaFuT0Vw=="],
 
     "bun-types": ["bun-types@1.2.5", "", { "dependencies": { "@types/node": "*", "@types/ws": "~8.5.10" } }, "sha512-3oO6LVGGRRKI4kHINx5PIdIgnLRb7l/SprhzqXapmoYkFl5m4j6EvALvbDVuuBFaamB46Ap6HCUxIXNLCGy+tg=="],
 

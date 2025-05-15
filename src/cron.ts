@@ -1,4 +1,4 @@
-import { execCommand } from "./base.ts";
+import { execCommandMayError } from "./base/base.ts";
 import { normalizeFileContent, writeFile } from "./files.ts";
 import { normalizePath } from "./path.ts";
 
@@ -14,7 +14,7 @@ export const createCron = async ({
 
   const tempFile = `/tmp/cron_${new Date().getTime().toString()}`;
 
-  const { output: cronConfig } = await execCommand("crontab -l");
+  const { output: cronConfig } = await execCommandMayError("crontab -l");
   let newCronConfig = cronConfig;
 
   if (cronConfig.includes(constructedLine)) {
@@ -31,7 +31,7 @@ export const createCron = async ({
   );
 
   await writeFile(tempFile, newCronConfig);
-  await execCommand(`cat ${tempFile}`);
-  await execCommand(`crontab ${tempFile}`);
-  await execCommand(`rm ${tempFile}`);
+  await execCommandMayError(`cat ${tempFile}`);
+  await execCommandMayError(`crontab ${tempFile}`);
+  await execCommandMayError(`rm ${tempFile}`);
 };
