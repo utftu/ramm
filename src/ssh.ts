@@ -1,7 +1,9 @@
-import { execBySsh, execCommandMayError } from "./base/base.ts";
+import { execBySsh, execCommand } from "./base/base.ts";
 import type { Context } from "./context.ts";
 import { debug } from "console";
 import { writeIfNew } from "./files.ts";
+import { debugApiCall } from "./debug.ts";
+import { file } from "bun";
 
 export const addKeyToHostConfig = async (
   pathToHost: string,
@@ -28,21 +30,24 @@ async function createSshKey(pathToKey: string, comment?: string) {
   const pathToKeyPub = `${pathToKey}.pub`;
   const pathToDir = pathToKey.split("/").slice(0, -1).join("/");
 
-  const pathToKeyFile = Bun.file(pathToKey);
-  const pathToKeyPubFile = Bun.file(pathToKeyPub);
+  const pathToKeyFile = file(pathToKey);
+  const pathToKeyPubFile = file(pathToKeyPub);
 
+  debugApiCall(`file(${pathToKey}).exist()`);
+  debugApiCall(`file(${pathToKeyPub}).exist()`);
   if ((await pathToKeyFile.exists()) && (await pathToKeyPubFile.exists())) {
     return await pathToKeyPubFile.text();
   }
 
-  await execCommandMayError(`mkdir -p ${pathToDir}`);
+  await execCommand(`mkdir -p ${pathToDir}`);
 
-  await execCommandMayError(
+  await execCommand(
     `ssh-keygen -t ed25519 -f ${pathToKey} -N "" -C "${comment || name}"`
   );
 
-  await execCommandMayError(`chmod 600 ${pathToKey}`);
+  await execCommand(`chmod 600 ${pathToKey}`);
 
+  debugApiCall(`file(${pathToKeyPub}).text()`);
   const pubKey = await Bun.file(pathToKeyPub).text();
 
   return pubKey;

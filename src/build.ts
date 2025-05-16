@@ -3,6 +3,7 @@ import type { Context } from "./context.ts";
 import { copyFilesBySsh, execBySsh, execCommand } from "./base/base.ts";
 import { normalizePath } from "./path.ts";
 import { writeFile } from "./files.ts";
+import { debug, debugApiCall } from "./debug.ts";
 
 export const buildAndRunOverSsh = async ({
   entrypoint,
@@ -28,22 +29,25 @@ export const buildAndRunOverSsh = async ({
   await execCommand(`rm -rf ${distDir}`);
 };
 
+const pathToJson = "/tmp/ramm_json";
 export const passVarsClient = async (
   data: Record<string, any>,
   context: Context
 ) => {
   const json = JSON.stringify(data);
 
-  await writeFile("/tmp/ramm_json", json);
+  debugApiCall(`writeFile(${pathToJson})`);
+  await writeFile(pathToJson, json);
 
-  await copyFilesBySsh("/tmp/ramm_json", "/tmp/ramm_json", context);
+  await copyFilesBySsh(pathToJson, pathToJson, context);
 
-  await execCommand("rm -rf /tmp/ramm_json");
+  await execCommand(`rm -rf ${pathToJson}`);
 };
 
 export const passVarsServer = async () => {
-  const jsonData = await file("/tmp/ramm_json").json();
+  debugApiCall(`file(${pathToJson}).json`);
+  const jsonData = await file(pathToJson).json();
 
-  await execCommand("rm -rf /tmp/ramm_json");
+  await execCommand(`rm -rf ${pathToJson}`);
   return jsonData;
 };

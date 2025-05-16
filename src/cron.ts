@@ -12,7 +12,7 @@ export const createCron = async ({
   const pathToFileNorm = normalizePath(pathToFile);
   const constructedLine = `${time} ${pathToFileNorm}`;
 
-  const tempFile = `/tmp/cron_${new Date().getTime().toString()}`;
+  const tempFile = `/tmp/ramm_cron}`;
 
   const { output: cronConfig } = await execCommandMayError("crontab -l");
   let newCronConfig = cronConfig;

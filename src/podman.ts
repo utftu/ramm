@@ -1,5 +1,5 @@
 import { $ } from "bun";
-import { defaultContext, execCommandMayError } from "./base/base.ts";
+import { defaultContext, execCommand } from "./base/base.ts";
 import { installSystemPackage } from "./packages.ts";
 import type { Context } from "./context.ts";
 import {
@@ -18,15 +18,13 @@ export const installPodman = async () => {
 };
 
 const createNetwork = async () => {
-  const netwroks = await execCommandMayError(
+  const netwroks = await execCommand(
     "podman network inspect $(podman network ls -q) -f '{{.NetworkInterface}}'"
   );
   if (netwroks.output.includes("podman_ramm")) {
     return;
   }
-  await execCommandMayError(
-    "podman network create --interface-name=podman_ramm ramm"
-  );
+  await execCommand("podman network create --interface-name=podman_ramm ramm");
 };
 
 export const getCreateCommand = async (name: string) => {
@@ -44,7 +42,7 @@ export const loginPodman = async (
   login: string,
   password: string
 ) => {
-  return await execCommandMayError(
+  return await execCommand(
     `echo "${password}" | podman login --username "${login}" --password-stdin ${address}`
   );
 };
@@ -53,7 +51,7 @@ export const runPodmanContainer = async (name: string, command: string) => {
   if ((await getCreateCommand(name)) !== command) {
     await $`podman rm -f ${name}`;
 
-    await execCommandMayError(command);
+    await execCommand(command);
     return;
   }
 
@@ -72,7 +70,7 @@ export const runPodmanContainerService = async (
   }
 
   await runPodmanContainer(name, command);
-  await execCommandMayError(
+  await execCommand(
     `podman generate systemd --name --new ${name} > ${serviceName}`
   );
 
@@ -80,18 +78,18 @@ export const runPodmanContainerService = async (
 };
 
 export const addNftPodmanRule = async () => {
-  const podmanNetworksResult = await execCommandMayError(
+  const podmanNetworksResult = await execCommand(
     "podman network inspect $(podman network ls -q) -f '{{.NetworkInterface}}'"
   );
   const podmanNetworks = podmanNetworksResult.output.trim().split("\n");
 
-  await execCommandMayError(
+  await execCommand(
     `nft add set inet ramm podman_interfaces '{ type ifname; flags dynamic; elements = { ${podmanNetworks.join(
       ", "
     )} }; }'`
   );
 
-  await execCommandMayError(
+  await execCommand(
     "nft insert rule inet ramm prerouting iifname @podman_interfaces accept"
   );
 };

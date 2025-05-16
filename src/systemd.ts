@@ -1,4 +1,8 @@
-import { defaultContext, execCommandMayError } from "./base/base.ts";
+import {
+  defaultContext,
+  execCommand,
+  execCommandMayError,
+} from "./base/base.ts";
 import { Context } from "./context.ts";
 
 // MUST START WITH systemctl
@@ -21,18 +25,14 @@ const getSystemdPathToService = (context: Context, serviceName: string) => {
 };
 
 export const stopSystemdService = async (constext: Context, name: string) => {
-  await execCommandMayError(
-    formatUserspace(constext, `systemctl stop ${name}`)
-  );
+  await execCommand(formatUserspace(constext, `systemctl stop ${name}`));
 };
 
 export const restartSystemdService = async (
   name: string,
   constext: Context = defaultContext
 ) => {
-  await execCommandMayError(
-    formatUserspace(constext, `systemctl restart ${name}`)
-  );
+  await execCommand(formatUserspace(constext, `systemctl restart ${name}`));
 };
 
 export const checkSystemdService = async (
@@ -53,15 +53,11 @@ export const createSystemdService = async (
 ) => {
   const pathToSeviceTarget = getSystemdPathToService(context, serviceName);
 
-  await execCommandMayError(`cp -v ${pathToServiceFile} ${pathToSeviceTarget}`);
+  await execCommand(`cp -v ${pathToServiceFile} ${pathToSeviceTarget}`);
 
-  await execCommandMayError(
-    formatUserspace(context, "systemctl daemon-reload")
-  );
-  await execCommandMayError(
+  await execCommand(formatUserspace(context, "systemctl daemon-reload"));
+  await execCommand(
     formatUserspace(context, `systemctl enable ${serviceName}`)
   );
-  await execCommandMayError(
-    formatUserspace(context, `sysyemctl start ${serviceName}`)
-  );
+  await execCommand(formatUserspace(context, `sysyemctl start ${serviceName}`));
 };

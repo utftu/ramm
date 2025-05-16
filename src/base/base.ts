@@ -1,5 +1,5 @@
 import { spawn } from "bun";
-import { debugCommand, debugSilentCommand } from "../debug.ts";
+import { debugCommand } from "../debug.ts";
 import { Context } from "../context.ts";
 import { readStreamToStr, tee, teeErr } from "./tee.ts";
 
@@ -45,19 +45,19 @@ export const execCommand = async (command: string) => {
   return result;
 };
 
-export const execCommandSilent = async (command: string) => {
-  debugSilentCommand(command);
-  const result = spawn(["bash", "-c", command]);
+// export const execCommandSilent = async (command: string) => {
+//   debugSilentCommand(command);
+//   const result = spawn(["bash", "-c", command]);
 
-  const output = await readStreamToStr(result.stdout);
+//   const output = await readStreamToStr(result.stdout);
 
-  await result.exited;
+//   await result.exited;
 
-  return {
-    output,
-    spawnResult: result,
-  };
-};
+//   return {
+//     output,
+//     spawnResult: result,
+//   };
+// };
 
 export const copyFilesBySsh = async (
   from: string,
