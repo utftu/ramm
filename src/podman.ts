@@ -21,6 +21,11 @@ const createNetwork = async () => {
   const netwroks = await execCommand(
     "podman network inspect $(podman network ls -q) -f '{{.NetworkInterface}}'"
   );
+  const podmanNetworks = await execCommand("podman network ls");
+
+  if (podmanNetworks.output.includes("ramm")) {
+    return;
+  }
   if (netwroks.output.includes("podman_ramm")) {
     return;
   }
