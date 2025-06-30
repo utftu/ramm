@@ -21,6 +21,7 @@ export {
   createAndAddSshKey,
   getServerFingerprintBySsh,
   addKeyToHostConfig,
+  setupSshKey,
 } from "./ssh.ts";
 export { normalizePath } from "./path.ts";
 export { createCron } from "./cron.ts";
