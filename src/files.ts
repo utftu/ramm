@@ -77,7 +77,7 @@ export const writeFile = async (pathToFile: string, str: string) => {
   await write(normalizedPath, str);
 };
 
-export const writeFileIfNotMatch = async (pathToFile: string, str: string) => {
+export const writeIfNewCompletely = async (pathToFile: string, str: string) => {
   const normalizedPath = normalizePath(pathToFile);
   await createFileIfNeed(normalizedPath);
 

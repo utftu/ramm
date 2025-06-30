@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.25",
   "scripts": {
-    "build": "bun build ./src/ramm.ts --target bun --outdir ./dist && cp ./src/bun.sh ./dist/bun.sh && bun run types",
+    "build": "bun build ./src/ramm.ts --target bun --outdir ./dist && cp ./src/bun.sh ./dist/bun.sh",
     "types": "tsc --project tsconfig.types.json"
   },
   "main": "dist/ramm.js",
@@ -19,6 +19,7 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
+    "dapes": "^0.0.26",
     "desy": "^0.0.14"
   }
 }

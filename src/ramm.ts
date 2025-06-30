@@ -14,7 +14,7 @@ export { setupNftable } from "./nft.ts";
 export {
   writeIfNew,
   writeFile,
-  writeFileIfNotMatch,
+  writeIfNewCompletely as writeFileIfNotMatch,
   normalizeFileContent,
 } from "./files.ts";
 export {

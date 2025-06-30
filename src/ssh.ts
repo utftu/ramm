@@ -1,7 +1,7 @@
 import { execBySsh, execCommand } from "./base/base.ts";
 import type { Context } from "./context.ts";
 import { debug } from "console";
-import { writeIfNew } from "./files.ts";
+import { writeIfNewCompletely, writeIfNew } from "./files.ts";
 import { debugApiCall } from "./debug.ts";
 import { file } from "bun";
 
@@ -53,7 +53,7 @@ async function createSshKey(pathToKey: string, comment?: string) {
   return pubKey;
 }
 
-const addSshKey = async (pubKey: string, context: Context) => {
+const addSshKeyToAuthorized = async (pubKey: string, context: Context) => {
   const { output: keys } = await execBySsh("cat .ssh/authorized_keys", context);
   if (keys.includes(pubKey)) {
     return;
@@ -71,5 +71,22 @@ export const createAndAddSshKey = async (
 
   debug(`Key is: ${pubKey}`);
 
-  await addSshKey(pubKey, context);
+  await addSshKeyToAuthorized(pubKey, context);
+};
+
+export const setupSshKey = async ({
+  key,
+  fingerprint,
+  pathToFile,
+  server,
+}: {
+  key: string;
+  fingerprint: string;
+  pathToFile: string;
+  server: string;
+}) => {
+  await writeIfNewCompletely(pathToFile, key);
+  await execCommand(`chmod 0600 ${pathToFile}`);
+  await writeIfNew("~/.ssh/known_hosts", fingerprint);
+  await addKeyToHostConfig("~/.ssh/config", server, pathToFile);
 };
