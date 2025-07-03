@@ -1,7 +1,7 @@
 import { spawn } from "bun";
 import { debugCommand } from "../debug.ts";
 import { Context } from "../context.ts";
-import { readStreamToStr, tee, teeErr } from "./tee.ts";
+import { tee, teeErr } from "./tee.ts";
 
 export const defaultContext = new Context({
   name: "root",

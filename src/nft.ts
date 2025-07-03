@@ -39,11 +39,13 @@ export const setupNftable = async ({
 }: {
   allowedIpV4: string[];
 }) => {
-  const listTable = await execCommand("nft list table inet ramm");
+  await execCommand("nft flush ruleset");
 
-  if (listTable.spawnResult.exitCode === 0) {
-    await execCommand("nft delete table inet ramm");
-  }
+  // const listTable = await execCommand("nft list table inet ramm");
+
+  // if (listTable.spawnResult.exitCode === 0) {
+  //   await execCommand("nft delete table inet ramm");
+  // }
   const nftTable = createNftTable({ allowedIpV4 });
   await execCommand(`nft -f - <<EOF\n${nftTable}\nEOF`);
 
