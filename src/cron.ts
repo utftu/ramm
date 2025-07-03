@@ -14,7 +14,7 @@ export const createCron = async ({
 
   const tempFile = `/tmp/ramm_cron}`;
 
-  const { output: cronConfig } = await execCommandMayError("crontab -l");
+  const { stdout: cronConfig } = await execCommandMayError("crontab -l");
   let newCronConfig = cronConfig;
 
   if (cronConfig.includes(constructedLine)) {

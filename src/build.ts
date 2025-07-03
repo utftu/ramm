@@ -3,7 +3,7 @@ import type { Context } from "./context.ts";
 import { copyFilesBySsh, execBySsh, execCommand } from "./base/base.ts";
 import { normalizePath } from "./path.ts";
 import { writeFile } from "./files.ts";
-import { debug, debugApiCall } from "./debug.ts";
+import { printFunction } from "./print.ts";
 
 export const buildAndRunOverSsh = async ({
   entrypoint,
@@ -34,9 +34,9 @@ export const passVarsClient = async (
   data: Record<string, any>,
   context: Context
 ) => {
+  printFunction("passVarsClient");
   const json = JSON.stringify(data);
 
-  debugApiCall(`writeFile(${pathToJson})`);
   await writeFile(pathToJson, json);
 
   await copyFilesBySsh(pathToJson, pathToJson, context);
@@ -45,7 +45,7 @@ export const passVarsClient = async (
 };
 
 export const passVarsServer = async () => {
-  debugApiCall(`file(${pathToJson}).json`);
+  printFunction("passVarsServer");
   const jsonData = await file(pathToJson).json();
 
   await execCommand(`rm -rf ${pathToJson}`);

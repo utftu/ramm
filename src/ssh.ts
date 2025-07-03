@@ -2,8 +2,8 @@ import { execBySsh, execCommand } from "./base/base.ts";
 import type { Context } from "./context.ts";
 import { debug } from "console";
 import { writeIfNewCompletely, writeIfNew } from "./files.ts";
-import { debugApiCall } from "./debug.ts";
 import { file } from "bun";
+import { printFunction } from "./print.ts";
 
 export const addKeyToHostConfig = async (
   pathToHost: string,
@@ -18,14 +18,15 @@ export const addKeyToHostConfig = async (
 };
 
 export const getServerFingerprintBySsh = async (context: Context) => {
-  const { output } = await execBySsh(
+  const { stdout } = await execBySsh(
     'ssh-keyscan -t ed25519 localhost | grep -v "^#"',
     context
   );
-  return output.replace("localhost", context.domain);
+  return stdout.replace("localhost", context.domain);
 };
 
 async function createSshKey(pathToKey: string, comment?: string) {
+  printFunction(createSshKey.name);
   const name = pathToKey.split("/").at(-1);
   const pathToKeyPub = `${pathToKey}.pub`;
   const pathToDir = pathToKey.split("/").slice(0, -1).join("/");
@@ -33,8 +34,6 @@ async function createSshKey(pathToKey: string, comment?: string) {
   const pathToKeyFile = file(pathToKey);
   const pathToKeyPubFile = file(pathToKeyPub);
 
-  debugApiCall(`file(${pathToKey}).exist()`);
-  debugApiCall(`file(${pathToKeyPub}).exist()`);
   if ((await pathToKeyFile.exists()) && (await pathToKeyPubFile.exists())) {
     return await pathToKeyPubFile.text();
   }
@@ -47,14 +46,13 @@ async function createSshKey(pathToKey: string, comment?: string) {
 
   await execCommand(`chmod 600 ${pathToKey}`);
 
-  debugApiCall(`file(${pathToKeyPub}).text()`);
   const pubKey = await Bun.file(pathToKeyPub).text();
 
   return pubKey;
 }
 
 const addSshKeyToAuthorized = async (pubKey: string, context: Context) => {
-  const { output: keys } = await execBySsh("cat .ssh/authorized_keys", context);
+  const { stdout: keys } = await execBySsh("cat .ssh/authorized_keys", context);
   if (keys.includes(pubKey)) {
     return;
   }

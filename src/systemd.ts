@@ -4,6 +4,7 @@ import {
   execCommandMayError,
 } from "./base/base.ts";
 import { Context } from "./context.ts";
+import { printFunction } from "./print.ts";
 
 // MUST START WITH systemctl
 const systemctlWordLangth = "systemctl ".length;
@@ -32,6 +33,7 @@ export const restartSystemdService = async (
   name: string,
   constext: Context = defaultContext
 ) => {
+  printFunction(`restartSystemdService ${name}`);
   await execCommand(formatUserspace(constext, `systemctl restart ${name}`));
 };
 
@@ -51,6 +53,7 @@ export const createSystemdService = async (
   serviceName: string,
   pathToServiceFile: string
 ) => {
+  printFunction(`createSystemdService ${serviceName}`);
   const pathToSeviceTarget = getSystemdPathToService(context, serviceName);
 
   await execCommand(`cp -v ${pathToServiceFile} ${pathToSeviceTarget}`);

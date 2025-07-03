@@ -1,7 +1,7 @@
-import { spawn } from "bun";
-import { debugCommand } from "../debug.ts";
+import { spawn, type Subprocess } from "bun";
+import { printCommand } from "../print.ts";
 import { Context } from "../context.ts";
-import { tee, teeErr } from "./tee.ts";
+import { teeStderr, teeStdout } from "./tee.ts";
 
 export const defaultContext = new Context({
   name: "root",
@@ -10,34 +10,126 @@ export const defaultContext = new Context({
   sudo: false,
 });
 
-export const execCommandMayError = async (command: string) => {
-  debugCommand(command);
-  const result = spawn(["bash", "-c", command], {
+export type ExecCommandStore = {
+  spawnResult?: Subprocess<"inherit", "pipe", "pipe">;
+};
+
+type ExecProps = {
+  store?: ExecCommandStore;
+  env?: Record<string, string>;
+  cwd?: string;
+  prefix?: string;
+  signal?: AbortSignal;
+} | void;
+
+export const execCommandRaw = async (
+  command: string,
+  { store = {}, signal, env, cwd, prefix = "" }: ExecProps = {}
+) => {
+  const spawnResult = spawn(["bash", "-c", command], {
     stdin: "inherit",
-    stdout: "pipe", // Перехватываем stdout
+    stdout: "pipe",
     stderr: "pipe",
+    signal,
+    cwd,
+    env,
   });
 
-  const [output, outputErr] = await Promise.all([
-    tee(result.stdout),
-    teeErr(result.stderr),
+  store.spawnResult = spawnResult;
+
+  const [stdout, stderr] = await Promise.all([
+    teeStdout(spawnResult.stdout, prefix),
+    teeStderr(spawnResult.stderr, prefix),
   ]);
 
-  await result.exited;
+  await spawnResult.exited;
 
   return {
-    outputErr,
-    output,
-    spawnResult: result,
+    stderr,
+    stdout,
+    spawnResult,
   };
 };
 
-export const execCommand = async (command: string) => {
-  const result = await execCommandMayError(command);
+export const execCommandMayError = async (
+  command: string,
+  props: ExecProps
+) => {
+  printCommand(command);
+  return execCommandRaw(command, props);
+};
+
+// export type ExecCommandStore = { spawnResult?: ReturnType<typeof spawn> };
+// const execCommandRaw = async ({
+//   command,
+//   store,
+//   signal,
+//   env,
+//   cwd,
+//   prefix = "",
+// }: {
+//   command: string;
+//   store: ExecCommandStore;
+//   env?: Record<string, string>;
+//   cwd?: string;
+//   prefix: string;
+//   signal: AbortSignal;
+// }) => {
+//   // process.stdout.write(prefix + makeGreen(command) + "\n");
+
+//   const spawnResult = spawn(["bash", "-c", command], {
+//     stdin: "inherit",
+//     stdout: "pipe",
+//     stderr: "pipe",
+//     signal,
+//     cwd,
+//     env,
+//   });
+
+//   store.spawnResult = spawnResult;
+
+//   const [stdout, stderr] = await Promise.all([
+//     teeStdout(spawnResult.stdout, prefix),
+//     teeStderr(spawnResult.stderr, prefix),
+//   ]);
+
+//   await spawnResult.exited;
+
+//   return {
+//     stderr,
+//     stdout,
+//     spawnResult,
+//   };
+// };
+
+// export const execCommandMayError = async (command: string) => {
+//   debugCommand(command);
+//   const result = spawn(["bash", "-c", command], {
+//     stdin: "inherit",
+//     stdout: "pipe", // Перехватываем stdout
+//     stderr: "pipe",
+//   });
+
+//   const [output, outputErr] = await Promise.all([
+//     teeStdout(result.stdout, ""),
+//     teeStderr(result.stderr, ""),
+//   ]);
+
+//   await result.exited;
+
+//   return {
+//     outputErr,
+//     output,
+//     spawnResult: result,
+//   };
+// };
+
+export const execCommand = async (command: string, props: ExecProps) => {
+  const result = await execCommandMayError(command, props);
 
   if (result.spawnResult.exitCode !== 0) {
-    console.error(">>>Error<<<");
-    console.error("command:", command);
+    console.error(`Error exit code:" ${result.spawnResult.exitCode}`);
+    console.error(`Command: ${command}`);
 
     throw new Error(command);
   }

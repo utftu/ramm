@@ -9,7 +9,7 @@ export { installPodman, runPodmanContainer, loginPodman } from "./podman.ts";
 export { runPodmanContainerService, addNftPodmanRule } from "./podman.ts";
 export { restartSystemdService } from "./systemd.ts";
 export { installSystemPackage } from "./packages.ts";
-export { debugBlock } from "./debug.ts";
+export { printBlock } from "./print.ts";
 export { setupNftable } from "./nft.ts";
 export {
   writeIfNew,

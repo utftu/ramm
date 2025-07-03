@@ -1,49 +1,36 @@
-export const tee = async (read: ReadableStream) => {
+const tee = async (
+  read: ReadableStream,
+  write: (text: string) => void,
+  prefix: string
+) => {
   const reader = read.getReader();
+  let leftover = "";
   let output = "";
 
+  const decoder = new TextDecoder("utf-8");
+
   while (true) {
-    const { value, done: doneReading } = await reader.read();
-    if (doneReading) {
+    const { value, done } = await reader.read();
+    if (done) {
+      if (leftover) write(prefix + leftover + "\n");
       return output;
     }
 
-    const decoder = new TextDecoder("utf-8");
+    const decodedOutput = decoder.decode(value, { stream: true });
+    output += decodedOutput;
 
-    output += decoder.decode(value);
-    process.stdout.write(value);
+    const lines = (leftover + decodedOutput).split("\n");
+    leftover = lines.pop() ?? "";
+
+    for (const line of lines) {
+      write(prefix + line + "\n");
+    }
   }
 };
 
-export const teeErr = async (read: ReadableStream) => {
-  const reader = read.getReader();
-  let output = "";
-
-  while (true) {
-    const { value, done: doneReading } = await reader.read();
-    if (doneReading) {
-      return output;
-    }
-
-    const decoder = new TextDecoder("utf-8");
-
-    output += decoder.decode(value);
-    process.stderr.write(value);
-  }
+export const teeStdout = (read: ReadableStream, prefix: string) => {
+  return tee(read, (text) => process.stdout.write(text), prefix);
 };
-
-export const readStreamToStr = async (read: ReadableStream) => {
-  const reader = read.getReader();
-  let output = "";
-
-  while (true) {
-    const { value, done: doneReading } = await reader.read();
-    if (doneReading) {
-      return output;
-    }
-
-    const decoder = new TextDecoder("utf-8");
-
-    output += decoder.decode(value);
-  }
+export const teeStderr = (read: ReadableStream, prefix: string) => {
+  return tee(read, (text) => process.stderr.write(text), prefix);
 };

@@ -23,10 +23,10 @@ const createNetwork = async () => {
   );
   const podmanNetworks = await execCommand("podman network ls");
 
-  if (podmanNetworks.output.includes("ramm")) {
+  if (podmanNetworks.stdout.includes("ramm")) {
     return;
   }
-  if (netwroks.output.includes("podman_ramm")) {
+  if (netwroks.stdout.includes("podman_ramm")) {
     return;
   }
   await execCommand("podman network create --interface-name=podman_ramm ramm");
@@ -86,7 +86,7 @@ export const addNftPodmanRule = async () => {
   const podmanNetworksResult = await execCommand(
     "podman network inspect $(podman network ls -q) -f '{{.NetworkInterface}}'"
   );
-  const podmanNetworks = podmanNetworksResult.output.trim().split("\n");
+  const podmanNetworks = podmanNetworksResult.stdout.trim().split("\n");
 
   await execCommand(
     `nft add set inet ramm podman_interfaces '{ type ifname; flags dynamic; elements = { ${podmanNetworks.join(
