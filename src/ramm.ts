@@ -1,8 +1,9 @@
 export {
-  execBySsh,
   execCommandOverSsh,
-  execCommandMayError as execCommand,
+  execCommand,
+  execCommandMayError,
   copyFilesBySsh,
+  execCommandRaw,
 } from "./base/base.ts";
 export { Context } from "./context.ts";
 export { installBun } from "./init.ts";
@@ -20,9 +21,9 @@ export {
 } from "./files.ts";
 export {
   createAndAddSshKey,
-  getServerFingerprintBySsh,
+  getServerFingerprintOverSsh,
   addKeyToHostConfig,
-  setupSshKey,
+  addSshKeyToUse as setupSshKey,
 } from "./ssh.ts";
 export { normalizePath } from "./path.ts";
 export { createCron } from "./cron.ts";

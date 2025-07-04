@@ -1,6 +1,10 @@
 import { build, file } from "bun";
 import type { Context } from "./context.ts";
-import { copyFilesBySsh, execBySsh, execCommand } from "./base/base.ts";
+import {
+  copyFilesBySsh,
+  execCommand,
+  execCommandOverSsh,
+} from "./base/base.ts";
 import { normalizePath } from "./path.ts";
 import { writeFile } from "./files.ts";
 import { printFunction } from "./print.ts";
@@ -25,7 +29,7 @@ export const buildAndRunOverSsh = async ({
   const relativePathToFile = pathToDistFile.slice(distDir.length + 1);
   await copyFilesBySsh(`${distDir}/`, distDir, context);
 
-  await execBySsh(`bun run ${distDir}/${relativePathToFile}`, context);
+  await execCommandOverSsh(`bun run ${distDir}/${relativePathToFile}`, context);
   await execCommand(`rm -rf ${distDir}`);
 };
 

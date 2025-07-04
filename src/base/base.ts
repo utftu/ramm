@@ -72,20 +72,6 @@ export const execCommand = async (command: string, props: ExecProps) => {
   return result;
 };
 
-// export const execCommandSilent = async (command: string) => {
-//   debugSilentCommand(command);
-//   const result = spawn(["bash", "-c", command]);
-
-//   const output = await readStreamToStr(result.stdout);
-
-//   await result.exited;
-
-//   return {
-//     output,
-//     spawnResult: result,
-//   };
-// };
-
 export const copyFilesBySsh = async (
   from: string,
   to: string,
@@ -94,12 +80,12 @@ export const copyFilesBySsh = async (
   await execCommand(`rsync -avz ${from} ${context.getAddress()}:${to}`);
 };
 
-export const execBySsh = async (command: string, context: Context) => {
-  const sshKeyPart = context.sshKey ? ` -i ${context.sshKey}` : "";
-  return await execCommand(
-    `ssh${sshKeyPart} ${context.getAddress()} '${command}'`
-  );
-};
+// export const execBySsh = async (command: string, context: Context) => {
+//   const sshKeyPart = context.sshKey ? ` -i ${context.sshKey}` : "";
+//   return await execCommand(
+//     `ssh${sshKeyPart} ${context.getAddress()} '${command}'`
+//   );
+// };
 
 export const execCommandOverSsh = async (command: string, context: Context) => {
   const sshKeyPart = context.sshKey ? ` -i ${context.sshKey}` : "";

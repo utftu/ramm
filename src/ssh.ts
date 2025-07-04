@@ -1,9 +1,9 @@
-import { execBySsh, execCommand } from "./base/base.ts";
+import { execCommand, execCommandOverSsh } from "./base/base.ts";
 import type { Context } from "./context.ts";
-import { debug } from "console";
 import { writeIfNewCompletely, writeIfNew } from "./files.ts";
 import { file } from "bun";
 import { printFunction } from "./print.ts";
+import { normalizePath } from "./path.ts";
 
 export const addKeyToHostConfig = async (
   pathToHost: string,
@@ -17,21 +17,22 @@ export const addKeyToHostConfig = async (
   await writeIfNew(pathToHost, text);
 };
 
-export const getServerFingerprintBySsh = async (context: Context) => {
-  const { stdout } = await execBySsh(
+export const getServerFingerprintOverSsh = async (context: Context) => {
+  const { stdout } = await execCommandOverSsh(
     'ssh-keyscan -t ed25519 localhost | grep -v "^#"',
     context
   );
   return stdout.replace("localhost", context.domain);
 };
 
-async function createSshKey(pathToKey: string, comment?: string) {
-  printFunction(createSshKey.name);
-  const name = pathToKey.split("/").at(-1);
-  const pathToKeyPub = `${pathToKey}.pub`;
-  const pathToDir = pathToKey.split("/").slice(0, -1).join("/");
+async function createSshKey(filePath: string, comment?: string) {
+  printFunction(`${createSshKey.name} ${filePath}`);
+  const normalizedPathToKey = normalizePath(filePath);
+  const name = normalizedPathToKey.split("/").at(-1);
+  const pathToKeyPub = `${normalizedPathToKey}.pub`;
+  const pathToDir = normalizedPathToKey.split("/").slice(0, -1).join("/");
 
-  const pathToKeyFile = file(pathToKey);
+  const pathToKeyFile = file(normalizedPathToKey);
   const pathToKeyPubFile = file(pathToKeyPub);
 
   if ((await pathToKeyFile.exists()) && (await pathToKeyPubFile.exists())) {
@@ -41,50 +42,62 @@ async function createSshKey(pathToKey: string, comment?: string) {
   await execCommand(`mkdir -p ${pathToDir}`);
 
   await execCommand(
-    `ssh-keygen -t ed25519 -f ${pathToKey} -N "" -C "${comment || name}"`
+    `ssh-keygen -t ed25519 -f ${normalizedPathToKey} -N "" -C "${
+      comment || name
+    }"`
   );
 
-  await execCommand(`chmod 600 ${pathToKey}`);
+  await execCommand(`chmod 600 ${normalizedPathToKey}`);
 
   const pubKey = await Bun.file(pathToKeyPub).text();
 
   return pubKey;
 }
 
-const addSshKeyToAuthorized = async (pubKey: string, context: Context) => {
-  const { stdout: keys } = await execBySsh("cat .ssh/authorized_keys", context);
+const addSshKeyToAuthorizedOverSsh = async (
+  pubKey: string,
+  context: Context
+) => {
+  printFunction(`${addSshKeyToAuthorizedOverSsh.name} ${pubKey}`);
+  const { stdout: keys } = await execCommandOverSsh(
+    "cat .ssh/authorized_keys",
+    context
+  );
   if (keys.includes(pubKey)) {
     return;
   }
 
-  await execBySsh(`echo "${pubKey}" >> .ssh/authorized_keys`, context);
+  await execCommandOverSsh(`echo "${pubKey}" >> .ssh/authorized_keys`, context);
 };
 
 export const createAndAddSshKey = async (
-  pathToKey: string,
+  filePath: string,
   comment: string,
   context: Context
 ) => {
-  const pubKey = await createSshKey(pathToKey, comment);
+  const normalizedPath = normalizePath(filePath);
+  const pubKey = await createSshKey(normalizedPath, comment);
 
-  debug(`Key is: ${pubKey}`);
+  console.log(`Key is: ${pubKey}`);
 
-  await addSshKeyToAuthorized(pubKey, context);
+  await addSshKeyToAuthorizedOverSsh(pubKey, context);
 };
 
-export const setupSshKey = async ({
+export const addSshKeyToUse = async ({
   key,
   fingerprint,
-  pathToFile,
+  filePath,
   server,
 }: {
   key: string;
   fingerprint: string;
-  pathToFile: string;
+  filePath: string;
   server: string;
 }) => {
-  await writeIfNewCompletely(pathToFile, key);
-  await execCommand(`chmod 0600 ${pathToFile}`);
+  printFunction(`${addSshKeyToUse.name} ${filePath}`);
+  const normalizedFilePath = normalizePath(filePath);
+  await writeIfNewCompletely(normalizedFilePath, key);
+  await execCommand(`chmod 0600 ${normalizedFilePath}`);
   await writeIfNew("~/.ssh/known_hosts", fingerprint);
-  await addKeyToHostConfig("~/.ssh/config", server, pathToFile);
+  await addKeyToHostConfig("~/.ssh/config", server, normalizedFilePath);
 };
