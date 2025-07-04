@@ -16,14 +16,15 @@ export { setupNftable } from "./nft.ts";
 export {
   writeIfNew,
   writeFile,
-  writeIfNewCompletely as writeFileIfNotMatch,
+  writeIfNewCompletely,
   normalizeFileContent,
 } from "./files.ts";
 export {
   createAndAddSshKey,
-  getServerFingerprintOverSsh,
+  getServerFingerprint,
   addKeyToHostConfig,
-  addSshKeyToUse as setupSshKey,
+  addSshKeyToUse,
+  saveSshFingerptint,
 } from "./ssh.ts";
 export { normalizePath } from "./path.ts";
 export { createCron } from "./cron.ts";

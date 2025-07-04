@@ -17,12 +17,21 @@ export const addKeyToHostConfig = async (
   await writeIfNew(pathToHost, text);
 };
 
-export const getServerFingerprintOverSsh = async (context: Context) => {
+export const getServerFingerprint = async (context: Context) => {
   const { stdout } = await execCommandOverSsh(
     'ssh-keyscan -t ed25519 localhost | grep -v "^#"',
     context
   );
   return stdout.replace("localhost", context.domain);
+};
+
+export const saveSshFingerptint = async (
+  filePath: string,
+  context: Context
+) => {
+  const fingerprint = await getServerFingerprint(context);
+
+  await writeIfNewCompletely(filePath, fingerprint);
 };
 
 async function createSshKey(filePath: string, comment?: string) {
