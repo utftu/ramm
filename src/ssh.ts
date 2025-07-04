@@ -29,9 +29,10 @@ export const saveSshFingerptint = async (
   filePath: string,
   context: Context
 ) => {
+  const normalizedPath = normalizePath(filePath);
   const fingerprint = await getServerFingerprint(context);
 
-  await writeIfNewCompletely(filePath, fingerprint);
+  await writeIfNewCompletely(filePath, normalizedPath);
 };
 
 async function createSshKey(filePath: string, comment?: string) {
