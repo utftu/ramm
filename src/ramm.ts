@@ -1,5 +1,6 @@
 export {
   execBySsh,
+  execCommandOverSsh,
   execCommandMayError as execCommand,
   copyFilesBySsh,
 } from "./base/base.ts";

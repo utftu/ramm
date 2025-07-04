@@ -59,76 +59,11 @@ export const execCommandMayError = async (
   return execCommandRaw(command, props);
 };
 
-// export type ExecCommandStore = { spawnResult?: ReturnType<typeof spawn> };
-// const execCommandRaw = async ({
-//   command,
-//   store,
-//   signal,
-//   env,
-//   cwd,
-//   prefix = "",
-// }: {
-//   command: string;
-//   store: ExecCommandStore;
-//   env?: Record<string, string>;
-//   cwd?: string;
-//   prefix: string;
-//   signal: AbortSignal;
-// }) => {
-//   // process.stdout.write(prefix + makeGreen(command) + "\n");
-
-//   const spawnResult = spawn(["bash", "-c", command], {
-//     stdin: "inherit",
-//     stdout: "pipe",
-//     stderr: "pipe",
-//     signal,
-//     cwd,
-//     env,
-//   });
-
-//   store.spawnResult = spawnResult;
-
-//   const [stdout, stderr] = await Promise.all([
-//     teeStdout(spawnResult.stdout, prefix),
-//     teeStderr(spawnResult.stderr, prefix),
-//   ]);
-
-//   await spawnResult.exited;
-
-//   return {
-//     stderr,
-//     stdout,
-//     spawnResult,
-//   };
-// };
-
-// export const execCommandMayError = async (command: string) => {
-//   debugCommand(command);
-//   const result = spawn(["bash", "-c", command], {
-//     stdin: "inherit",
-//     stdout: "pipe", // Перехватываем stdout
-//     stderr: "pipe",
-//   });
-
-//   const [output, outputErr] = await Promise.all([
-//     teeStdout(result.stdout, ""),
-//     teeStderr(result.stderr, ""),
-//   ]);
-
-//   await result.exited;
-
-//   return {
-//     outputErr,
-//     output,
-//     spawnResult: result,
-//   };
-// };
-
 export const execCommand = async (command: string, props: ExecProps) => {
   const result = await execCommandMayError(command, props);
 
   if (result.spawnResult.exitCode !== 0) {
-    console.error(`Error exit code:" ${result.spawnResult.exitCode}`);
+    console.error(`Error exit code: ${result.spawnResult.exitCode}`);
     console.error(`Command: ${command}`);
 
     throw new Error(command);
@@ -160,6 +95,13 @@ export const copyFilesBySsh = async (
 };
 
 export const execBySsh = async (command: string, context: Context) => {
+  const sshKeyPart = context.sshKey ? ` -i ${context.sshKey}` : "";
+  return await execCommand(
+    `ssh${sshKeyPart} ${context.getAddress()} '${command}'`
+  );
+};
+
+export const execCommandOverSsh = async (command: string, context: Context) => {
   const sshKeyPart = context.sshKey ? ` -i ${context.sshKey}` : "";
   return await execCommand(
     `ssh${sshKeyPart} ${context.getAddress()} '${command}'`
