@@ -8,6 +8,7 @@ import {
   getSysyemdServiceName,
   stopSystemdService,
 } from "./systemd.ts";
+import { safeNftTable } from "./nft.ts";
 
 export const installPodman = async () => {
   if ((await $`command -v podman`.nothrow().quiet()).exitCode !== 0) {
@@ -97,4 +98,6 @@ export const addNftPodmanRule = async () => {
   await execCommand(
     "nft insert rule inet ramm prerouting iifname @podman_interfaces accept"
   );
+
+  await safeNftTable();
 };

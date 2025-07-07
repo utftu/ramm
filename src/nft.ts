@@ -83,16 +83,20 @@ export const setupNftable = async ({
   allowedIpV4: string[];
   allowedPorts: string[];
 }) => {
-  await execCommand("nft flush ruleset");
+  // await execCommand("nft flush ruleset");
 
-  // const listTable = await execCommand("nft list table inet ramm");
+  const listTable = await execCommand("nft list table inet ramm");
 
-  // if (listTable.spawnResult.exitCode === 0) {
-  //   await execCommand("nft delete table inet ramm");
-  // }
+  if (listTable.spawnResult.exitCode === 0) {
+    await execCommand("nft delete table inet ramm");
+  }
   const nftTable = createNftTable({ allowedIpV4, allowedPorts });
   await execCommand(`nft -f - <<EOF\n${nftTable}\nEOF`);
 
+  await safeNftTable();
+};
+
+export const safeNftTable = async () => {
   await execCommand("nft list ruleset > /etc/nftables.conf");
   await execCommand("systemctl enable nftables");
 };
