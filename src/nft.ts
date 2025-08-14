@@ -1,13 +1,13 @@
-import { execCommand } from "./base/base.ts";
+import { execCommand, execCommandMayError } from "./base/base.ts";
 
 export const localNftChainName = "local_chain";
 
 const createNftTable = ({
   allowedIpV4,
-  allowedPorts,
+  allowedPorts = [],
 }: {
   allowedIpV4: string[];
-  allowedPorts: string[];
+  allowedPorts?: (string | number)[];
 }) => {
   const nftTable = `table inet ramm {
     set allowed_ipv4 {
@@ -85,7 +85,7 @@ export const setupNftable = async ({
 }) => {
   // await execCommand("nft flush ruleset");
 
-  const listTable = await execCommand("nft list table inet ramm");
+  const listTable = await execCommandMayError("nft list table inet ramm");
 
   if (listTable.spawnResult.exitCode === 0) {
     await execCommand("nft delete table inet ramm");
