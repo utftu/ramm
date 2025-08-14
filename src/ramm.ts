@@ -14,9 +14,9 @@ export { installSystemPackage } from "./packages.ts";
 export { printBlock } from "./print.ts";
 export { setupNftable } from "./nft.ts";
 export {
-  writeIfNew,
+  writeIfNewStr,
   writeFile,
-  writeIfNewCompletely,
+  writeFileFull,
   normalizeFileContent,
 } from "./files.ts";
 export {

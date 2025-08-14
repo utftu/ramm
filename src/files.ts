@@ -52,7 +52,7 @@ const createFileIfNeed = async (rawFilePath: string) => {
   }
 };
 
-export const writeIfNew = async (rawFilePath: string, str: string) => {
+export const writeIfNewStr = async (rawFilePath: string, str: string) => {
   const filePath = normalizePath(rawFilePath);
   await createFileIfNeed(filePath);
 
@@ -70,7 +70,7 @@ export const writeFile = async (pathToFile: string, str: string) => {
   await write(normalizedPath, str);
 };
 
-export const writeIfNewCompletely = async (pathToFile: string, str: string) => {
+export const writeFileFull = async (pathToFile: string, str: string) => {
   const normalizedPath = normalizePath(pathToFile);
   await createFileIfNeed(normalizedPath);
 

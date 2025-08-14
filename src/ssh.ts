@@ -1,6 +1,6 @@
 import { execCommand, execCommandOverSsh } from "./base/base.ts";
 import type { Context } from "./context.ts";
-import { writeIfNewCompletely, writeIfNew } from "./files.ts";
+import { writeFileFull, writeIfNewStr } from "./files.ts";
 import { file } from "bun";
 import { printFunction } from "./print.ts";
 import { normalizePath } from "./path.ts";
@@ -14,7 +14,7 @@ export const addKeyToHostConfig = async (
   IdentityFile ${pathToKey}
 `;
 
-  await writeIfNew(pathToHost, text);
+  await writeIfNewStr(pathToHost, text);
 };
 
 export const getServerFingerprint = async (context: Context) => {
@@ -32,7 +32,7 @@ export const saveSshFingerptint = async (
   const normalizedPath = normalizePath(filePath);
   const fingerprint = await getServerFingerprint(context);
 
-  await writeIfNewCompletely(filePath, normalizedPath);
+  await writeFileFull(filePath, normalizedPath);
 };
 
 async function createSshKey(filePath: string, comment?: string) {
@@ -106,8 +106,8 @@ export const addSshKeyToUse = async ({
 }) => {
   printFunction(`${addSshKeyToUse.name} ${filePath}`);
   const normalizedFilePath = normalizePath(filePath);
-  await writeIfNewCompletely(normalizedFilePath, key);
+  await writeFileFull(normalizedFilePath, key);
   await execCommand(`chmod 0600 ${normalizedFilePath}`);
-  await writeIfNew("~/.ssh/known_hosts", fingerprint);
+  await writeIfNewStr("~/.ssh/known_hosts", fingerprint);
   await addKeyToHostConfig("~/.ssh/config", server, normalizedFilePath);
 };
