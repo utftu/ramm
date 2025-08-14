@@ -50,9 +50,9 @@ export const checkSystemdService = async (
 };
 
 export const createSystemdServiceByContent = async (
-  context: Context,
   serviceName: string,
-  content: string
+  content: string,
+  context: Context = defaultContext
 ) => {
   printFunction(`createSystemdServiceByContent ${serviceName}`);
   const pathToSeviceTarget = getSystemdPathToService(context, serviceName);
