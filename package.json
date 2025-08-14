@@ -16,10 +16,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "typescript": "^5.8.2"
-  },
-  "dependencies": {
-    "dapes": "^0.0.26",
-    "desy": "^0.0.14"
+    "typescript": "^5.8.2",
+    "dapes": "^0.0.26"
   }
 }
