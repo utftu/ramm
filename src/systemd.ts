@@ -4,6 +4,7 @@ import {
   execCommandMayError,
 } from "./base/base.ts";
 import { Context } from "./context.ts";
+import { writeFileFull } from "./files.ts";
 import { printFunction } from "./print.ts";
 
 // MUST START WITH systemctl
@@ -46,6 +47,23 @@ export const checkSystemdService = async (
   );
 
   return spawnResult.exitCode === 0;
+};
+
+export const createSystemdServiceByContent = async (
+  context: Context,
+  serviceName: string,
+  content: string
+) => {
+  printFunction(`createSystemdServiceByContent ${serviceName}`);
+  const pathToSeviceTarget = getSystemdPathToService(context, serviceName);
+
+  await writeFileFull(pathToSeviceTarget, content);
+
+  await execCommand(formatUserspace(context, "systemctl daemon-reload"));
+  await execCommand(
+    formatUserspace(context, `systemctl enable ${serviceName}`)
+  );
+  await execCommand(formatUserspace(context, `sysyemctl start ${serviceName}`));
 };
 
 export const createSystemdService = async (

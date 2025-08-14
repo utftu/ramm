@@ -9,7 +9,10 @@ export { Context } from "./context.ts";
 export { installBun } from "./init.ts";
 export { installPodman, runPodmanContainer, loginPodman } from "./podman.ts";
 export { runPodmanContainerService, addNftPodmanRule } from "./podman.ts";
-export { restartSystemdService } from "./systemd.ts";
+export {
+  restartSystemdService,
+  createSystemdServiceByContent,
+} from "./systemd.ts";
 export { installSystemPackage } from "./packages.ts";
 export { printBlock } from "./print.ts";
 export { setupNftable } from "./nft.ts";
