@@ -7,6 +7,48 @@ import { Context } from "./context.ts";
 import { writeFileFull } from "./files.ts";
 import { printFunction } from "./print.ts";
 
+export type ServiceProps = {
+  unit?: {
+    description?: string;
+  };
+  service: {
+    type: string;
+    execStart: string;
+    successExitStatus?: string;
+  };
+  install: {
+    wantedBy: string | string[];
+  };
+};
+
+export const createServiceContent = (serviceProps: ServiceProps) => {
+  let str = "";
+
+  for (const sectionName in serviceProps) {
+    if (str) {
+      str += "\n";
+    }
+    str += `${sectionName[0]!.toUpperCase()}${sectionName.slice(1)}\n`;
+
+    const section = serviceProps[sectionName as keyof typeof serviceProps];
+
+    for (const sectionKey in section) {
+      const sectionValue = section[sectionKey as keyof typeof section];
+      const arrayValues = Array.isArray(sectionValue)
+        ? sectionValue
+        : [sectionValue];
+
+      for (const value of arrayValues) {
+        str += `${sectionKey[0]!.toUpperCase()}${sectionKey.slice(
+          1
+        )}=${value}\n`;
+      }
+    }
+  }
+
+  return str;
+};
+
 // MUST START WITH systemctl
 const systemctlWordLangth = "systemctl ".length;
 const formatUserspace = (context: Context, command: string) => {
@@ -47,6 +89,31 @@ export const checkSystemdService = async (
   );
 
   return spawnResult.exitCode === 0;
+};
+
+export const createdSystemdTimer = async (
+  serviceName: string,
+  execStr: string
+) => {
+  const pathToSeviceTarget = getSystemdPathToService(
+    defaultContext,
+    serviceName
+  );
+
+  const serviceContent = `
+[Unit]
+Description=${serviceName}.service
+
+[Service]
+Type=oneshot
+ExecStart=${execStr}
+SuccessExitStatus=1
+
+[Install]
+WantedBy=timers.target
+`;
+
+  const timerContent = ``;
 };
 
 export const createSystemdServiceByContent = async (
