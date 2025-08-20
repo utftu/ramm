@@ -1,7 +1,7 @@
 {
   "name": "ramm",
   "type": "module",
-  "version": "0.0.43",
+  "version": "0.0.44",
   "scripts": {
     "build": "bun build ./src/ramm.ts --target bun --outdir ./dist && cp ./src/bun.sh ./dist/bun.sh",
     "types": "tsc --project tsconfig.types.json"
