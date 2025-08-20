@@ -3,10 +3,9 @@ import { defaultContext, execCommand } from "./base/base.ts";
 import { installSystemPackage } from "./packages.ts";
 import type { Context } from "./context.ts";
 import {
-  checkSystemdService,
+  checkSystemdUnit,
   createSystemdService,
-  getSysyemdServiceName,
-  stopSystemdService,
+  stopSystemdUnit,
 } from "./systemd.ts";
 import { safeNftTable } from "./nft.ts";
 
@@ -69,10 +68,10 @@ export const runPodmanContainerService = async (
   command: string,
   context: Context = defaultContext
 ) => {
-  const serviceName = getSysyemdServiceName(name);
+  const serviceName = `${name}.service`;
 
-  if (await checkSystemdService(context, serviceName)) {
-    await stopSystemdService(context, serviceName);
+  if (await checkSystemdUnit(serviceName, context)) {
+    await stopSystemdUnit(serviceName, context);
   }
 
   await runPodmanContainer(name, command);
@@ -80,7 +79,7 @@ export const runPodmanContainerService = async (
     `podman generate systemd --name --new ${name} > ${serviceName}`
   );
 
-  await createSystemdService(context, serviceName, serviceName);
+  await createSystemdService(serviceName, serviceName, context);
 };
 
 export const addNftPodmanRule = async () => {

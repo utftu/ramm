@@ -10,8 +10,12 @@ export { installBun } from "./init.ts";
 export { installPodman, runPodmanContainer, loginPodman } from "./podman.ts";
 export { runPodmanContainerService, addNftPodmanRule } from "./podman.ts";
 export {
-  restartSystemdService,
-  createSystemdServiceByContent,
+  startSystemdUnit,
+  enabledSystemdUnit,
+  restartSystemdUnit,
+  createSystemdService,
+  getSystemdPathToService,
+  createSystemdUnit,
 } from "./systemd.ts";
 export { installSystemPackage } from "./packages.ts";
 export { printBlock } from "./print.ts";
