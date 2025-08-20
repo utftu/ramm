@@ -16,7 +16,7 @@ const formatUserspace = (
   return "systemctl" + userPart + " " + command.slice(systemctlWordLangth);
 };
 
-const reloadSystemd = async (context: Context = defaultContext) => {
+export const reloadSystemd = async (context: Context = defaultContext) => {
   await execCommand(formatUserspace("systemctl daemon-reload", context));
 };
 
@@ -67,9 +67,7 @@ export const createSystemdUnit = async (
   const pathToSeviceTarget = getSystemdPathToService(unitName, context);
 
   await writeFileFull(pathToSeviceTarget, content);
-  await execCommand(
-    formatUserspace(`systemctl daemon-reload ${unitName}`, context)
-  );
+  await reloadSystemd(context);
 };
 
 export const getSystemdPathToService = (

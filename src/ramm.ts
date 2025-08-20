@@ -16,6 +16,7 @@ export {
   createSystemdService,
   getSystemdPathToService,
   createSystemdUnit,
+  reloadSystemd,
 } from "./systemd.ts";
 export { installSystemPackage } from "./packages.ts";
 export { printBlock } from "./print.ts";
