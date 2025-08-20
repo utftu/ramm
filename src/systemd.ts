@@ -87,6 +87,6 @@ export const createSystemdService = async (
   context: Context = defaultContext
 ) => {
   await createSystemdUnit(serviceName, content, context);
-  await enabledSystemdUnit(`systemctl enable ${serviceName}`, context);
-  await startSystemdUnit(`systemctl start ${serviceName}`, context);
+  await enabledSystemdUnit(serviceName, context);
+  await startSystemdUnit(serviceName, context);
 };
