@@ -18,8 +18,5 @@
     "@types/bun": "latest",
     "typescript": "^5.8.2",
     "dapes": "^0.0.26"
-  },
-  "dependencies": {
-    "vitest": "^3.2.4"
   }
 }
