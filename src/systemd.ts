@@ -64,13 +64,13 @@ export const createSystemdUnit = async (
   content: string,
   context: Context = defaultContext
 ) => {
-  const pathToSeviceTarget = getSystemdPathToService(unitName, context);
+  const pathToSeviceTarget = getSystemdPathToUnit(unitName, context);
 
   await writeFileFull(pathToSeviceTarget, content);
   await reloadSystemd(context);
 };
 
-export const getSystemdPathToService = (
+export const getSystemdPathToUnit = (
   serviceName: string,
   context: Context = defaultContext
 ) => {

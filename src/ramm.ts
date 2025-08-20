@@ -14,7 +14,7 @@ export {
   enabledSystemdUnit,
   restartSystemdUnit,
   createSystemdService,
-  getSystemdPathToService,
+  getSystemdPathToUnit as getSystemdPathToService,
   createSystemdUnit,
   reloadSystemd,
 } from "./systemd.ts";
