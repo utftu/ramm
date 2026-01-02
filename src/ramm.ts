@@ -6,7 +6,7 @@ export {
   execCommandRaw,
 } from "./base/base.ts";
 export { Context } from "./context.ts";
-export { installBun } from "./init.ts";
+export { installBunOverSsh } from "./init.ts";
 export { installPodman, runPodmanContainer, loginPodman } from "./podman.ts";
 export { runPodmanContainerService, addNftPodmanRule } from "./podman.ts";
 export {
