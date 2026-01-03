@@ -18,7 +18,7 @@ export const installSystemPackage = async (
     context
   );
 
-  if (checkResult.spawnResult.exitCode !== 0) {
+  if (checkResult.spawnResult.exitCode === 0) {
     return;
   }
 
