@@ -2,6 +2,10 @@
 
 if ! command -v unzip &> /dev/null; then
   . /etc/os-release
+
+  if [[ "$ID_LIKE" == *"rhel"* ]]; then
+    sudo dnf install -y unzip
+  fi
   
   if [[ "$ID" == "ubuntu" ]]; then
     sudo apt update
