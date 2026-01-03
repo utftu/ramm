@@ -24,9 +24,11 @@ type ExecProps = {
 
 export const execCommandRaw = async (
   command: string,
-  { store = {}, signal, env, cwd, prefix = "" }: ExecProps = {}
+  { store = {}, signal, env, cwd, prefix = "" }: ExecProps = {},
+  ctx?: Context
 ) => {
-  const spawnResult = spawn(["bash", "-c", command], {
+  const finalCommand = ctx?.sudo ? `sudo ${command}` : command;
+  const spawnResult = spawn(["bash", "-c", finalCommand], {
     stdin: "inherit",
     stdout: "pipe",
     stderr: "pipe",
@@ -59,7 +61,11 @@ export const execCommandMayError = async (
   return execCommandRaw(command, props);
 };
 
-export const execCommand = async (command: string, props: ExecProps) => {
+export const execCommand = async (
+  command: string,
+  props: ExecProps,
+  context?: Context
+) => {
   const result = await execCommandMayError(command, props);
 
   if (result.spawnResult.exitCode !== 0) {
@@ -79,13 +85,6 @@ export const copyFilesBySsh = async (
 ) => {
   await execCommand(`rsync -avz ${from} ${context.getAddress()}:${to}`);
 };
-
-// export const execBySsh = async (command: string, context: Context) => {
-//   const sshKeyPart = context.sshKey ? ` -i ${context.sshKey}` : "";
-//   return await execCommand(
-//     `ssh${sshKeyPart} ${context.getAddress()} '${command}'`
-//   );
-// };
 
 export const execCommandOverSsh = async (command: string, context: Context) => {
   const sshKeyPart = context.sshKey ? ` -i ${context.sshKey}` : "";

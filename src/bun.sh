@@ -14,10 +14,10 @@ if ! command -v unzip &> /dev/null; then
 fi
 
 if ! command -v bun &> /dev/null; then
-    echo "Installing..."
+    echo "Installing bun..."
     
     curl -fsSL https://bun.sh/install | bash
     ln -s "$HOME/.bun/bin/bun" /usr/local/bin/bun
 else
-    echo "Already installed."
+    echo "Already installed bun."
 fi

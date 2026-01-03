@@ -1,4 +1,5 @@
 import { execCommand, execCommandMayError } from "./base/base.ts";
+import { installSystemPackage } from "./packages.ts";
 
 export const localNftChainName = "local_chain";
 
@@ -40,40 +41,6 @@ const createNftTable = ({
     }
   }
   `;
-  // const nftTable = `table inet ramm {
-  //   set allowed_ipv4 {
-  //     type ipv4_addr
-  //     flags dynamic
-  //     elements = { ${allowedIpV4.join("\n\t")} }
-  //   }
-
-  //   chain local_chain_base {
-  //     iif "lo" accept
-  //     ct state established,related accept
-  //     ip saddr @allowed_ipv4 tcp dport 22 accept
-  //     tcp dport 22 ct state new limit rate over 700/minute burst 5 packets drop
-  //     tcp dport 22 accept
-  //     tcp dport 80 accept
-  //     ${allowedPorts
-  //       .map((port) => {
-  //         return `tcp dport ${port} accept`;
-  //       })
-  //       .join("\n")}
-  //     tcp dport 443 accept
-  //   }
-
-  //   chain local_chain {
-  //     jump local_chain_base
-  //     drop
-  //   }
-
-  //   chain prerouting {
-  //     type filter hook prerouting priority mangle; policy accept;
-  //     fib daddr type local jump local_chain
-  //   }
-  // }
-  // `;
-
   return nftTable;
 };
 export const setupNftable = async ({
@@ -83,7 +50,7 @@ export const setupNftable = async ({
   allowedIpV4: string[];
   allowedPorts: string[];
 }) => {
-  // await execCommand("nft flush ruleset");
+  await installSystemPackage("nftables");
 
   const listTable = await execCommandMayError("nft list table inet ramm");
 
