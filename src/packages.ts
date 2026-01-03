@@ -58,6 +58,10 @@ const packages: Record<string, PackageConfig> = {
     name: "nftables",
     command: "nft",
   },
+  podman: {
+    name: "podman",
+    command: "podman",
+  },
 };
 
 export const installSystemPackage = async (
