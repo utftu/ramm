@@ -37,6 +37,8 @@ const getInstallCommand = (manager: Manager, config: ManagerConfig) => {
     return `apt install -y ${config.name}`;
   } else if (manager === "dnf") {
     return `dnf install -y ${config.name}`;
+  } else {
+    throw new Error("Unknow manager");
   }
 };
 
@@ -75,7 +77,7 @@ export const installSystemPackage = async (
     await $`cat /etc/os-release | grep ^ID= | cut -d'=' -f2`.text()
   )
     .trim()
-    .replace(/'/g, "");
+    .replace(/"/g, "");
 
   const manager = getManagerByOs(osName);
   const managerConfig = getManagerConfig(manager, finalPackageEnt);
@@ -89,6 +91,10 @@ export const installSystemPackage = async (
   if (checkResult.spawnResult.exitCode === 0) {
     return;
   }
+
+  const installCommand = getInstallCommand(manager, managerConfig);
+
+  await execCommand(installCommand, {}, context);
 
   if (osName === "ubuntu") {
     await execCommand(`apt-get install -y ${managerConfig.name}`, {}, context);
