@@ -1,5 +1,5 @@
 import { $ } from "bun";
-import { execCommand } from "./base/base.ts";
+import { execCommand, execCommandMayError } from "./base/base.ts";
 import type { Context } from "./context.ts";
 
 const dnf_os = ["rocky", "fedora", "alma"];
@@ -12,9 +12,13 @@ export const installSystemPackage = async (
     await $`cat /etc/os-release | grep ^ID= | cut -d'=' -f2`.text()
   ).trim();
 
-  const checkWhich = await $`which ${packageName}`;
+  const checkResult = await execCommandMayError(
+    `which ${packageName}`,
+    {},
+    context
+  );
 
-  if (checkWhich.exitCode !== 0) {
+  if (checkResult.spawnResult.exitCode !== 0) {
     return;
   }
 

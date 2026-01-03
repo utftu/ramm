@@ -55,10 +55,11 @@ export const execCommandRaw = async (
 
 export const execCommandMayError = async (
   command: string,
-  props: ExecProps
+  props: ExecProps,
+  context?: Context
 ) => {
   printCommand(command);
-  return execCommandRaw(command, props);
+  return execCommandRaw(command, props, context);
 };
 
 export const execCommand = async (
@@ -66,7 +67,7 @@ export const execCommand = async (
   props: ExecProps,
   context?: Context
 ) => {
-  const result = await execCommandMayError(command, props);
+  const result = await execCommandMayError(command, props, context);
 
   if (result.spawnResult.exitCode !== 0) {
     console.error(`Error exit code: ${result.spawnResult.exitCode}`);
