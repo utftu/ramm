@@ -1,5 +1,5 @@
 export class Context {
-  name: string;
+  user: string;
   domain: string;
   userspace: boolean;
   sudo: boolean;
@@ -7,19 +7,19 @@ export class Context {
   params: Record<string, string> = {};
 
   constructor({
-    name,
+    user,
     address,
     userspace = false,
     sudo = false,
     sshKey,
   }: {
-    name: string;
+    user: string;
     address: string;
     userspace?: boolean;
     sudo?: boolean;
     sshKey?: string;
   }) {
-    this.name = name;
+    this.user = user;
     this.domain = address;
     this.sudo = sudo;
     this.userspace = userspace;
@@ -27,6 +27,6 @@ export class Context {
   }
 
   getAddress() {
-    return `${this.name}@${this.domain}`;
+    return `${this.user}@${this.domain}`;
   }
 }

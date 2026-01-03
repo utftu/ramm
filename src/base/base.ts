@@ -4,7 +4,7 @@ import { Context } from "../context.ts";
 import { teeStderr, teeStdout } from "./tee.ts";
 
 export const defaultContext = new Context({
-  name: "root",
+  user: "root",
   address: "0.0.0.0",
   userspace: false,
   sudo: false,
