@@ -36,7 +36,7 @@ const createNetwork = async () => {
   await execCommand("podman network create --interface-name=podman_ramm ramm");
 };
 
-export const getCreateCommand = async (name: string) => {
+const getCreateCommand = async (name: string) => {
   const podmanCreateCommand =
     await $`podman inspect --format '{{.Config.CreateCommand}}' ${name}`
       .nothrow()
@@ -54,6 +54,42 @@ export const loginPodman = async (
   return await execCommand(
     `echo "${password}" | podman login --username "${login}" --password-stdin ${address}`
   );
+};
+
+export const createPodmanCommand = (props: {
+  name?: string;
+  replace?: boolean;
+  background?: boolean;
+  network?: string;
+  envs?: { name: string; value: string }[];
+  volumes?: { from: string; to: string }[];
+  command: string;
+}) => {
+  const values: string[] = [];
+
+  if (props.name) {
+    values.push(`--name ${props.name}`);
+  }
+
+  if (props.replace) {
+    values.push("--replace");
+  }
+
+  if (props.background) {
+    values.push("-d");
+  }
+
+  if (props.network) {
+    values.push(`--network ${props.network}`);
+  }
+
+  for (const env of props.envs ?? []) {
+    values.push(`-e ${env.name}=${env.value}`);
+  }
+
+  for (const volume of props.volumes ?? []) {
+    values.push(`-v ${volume.from}:${volume.to}`);
+  }
 };
 
 export const runPodmanContainer = async (name: string, command: string) => {

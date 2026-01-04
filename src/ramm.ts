@@ -7,8 +7,14 @@ export {
 } from "./base/base.ts";
 export { Context } from "./context.ts";
 export { installBunOverSsh } from "./init.ts";
-export { installPodman, runPodmanContainer, loginPodman } from "./podman.ts";
-export { runPodmanContainerService, addNftPodmanRule } from "./podman.ts";
+export {
+  installPodman,
+  runPodmanContainer,
+  loginPodman,
+  runPodmanContainerService,
+  addNftPodmanRule,
+  createPodmanCommand,
+} from "./podman.ts";
 export {
   startSystemdUnit,
   enabledSystemdUnit,
