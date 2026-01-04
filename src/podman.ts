@@ -56,40 +56,55 @@ export const loginPodman = async (
   );
 };
 
-export const createPodmanCommand = (props: {
+export const createPodmanCommand = ({
+  name,
+  replace = true,
+  background = true,
+  networks = ["ramm"],
+  envs = [],
+  volumes = [],
+  command,
+}: {
   name?: string;
   replace?: boolean;
   background?: boolean;
-  network?: string;
+  networks?: string[];
   envs?: { name: string; value: string }[];
   volumes?: { from: string; to: string }[];
   command: string;
 }) => {
   const values: string[] = [];
 
-  if (props.name) {
-    values.push(`--name ${props.name}`);
+  values.push("podman", "run");
+
+  if (name) {
+    values.push(`--name ${name}`);
   }
 
-  if (props.replace) {
+  if (replace) {
     values.push("--replace");
   }
 
-  if (props.background) {
+  if (background) {
     values.push("-d");
   }
 
-  if (props.network) {
-    values.push(`--network ${props.network}`);
+  for (const network of networks) {
+    values.push(`--network ${network}`);
   }
 
-  for (const env of props.envs ?? []) {
+  for (const env of envs) {
     values.push(`-e ${env.name}=${env.value}`);
   }
 
-  for (const volume of props.volumes ?? []) {
+  for (const volume of volumes) {
     values.push(`-v ${volume.from}:${volume.to}`);
   }
+
+  values.push(command);
+
+  const str = values.join(" ");
+  return str;
 };
 
 export const runPodmanContainer = async (name: string, command: string) => {
