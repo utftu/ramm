@@ -72,7 +72,7 @@ export const createPodmanCommand = ({
   envs?: { name: string; value: string }[];
   volumes?: { from: string; to: string }[];
   command: string;
-}) => {
+}): string => {
   const values: string[] = [];
 
   values.push("podman", "run");
